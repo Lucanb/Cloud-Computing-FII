@@ -3,6 +3,7 @@ const fs = require('fs')
 const {config,pool} = require('./config')
 const {Routes,RouterController} = require('./router')
 const path = require('path')
+const PassWord = require('./password')
 
 const controller = new RouterController([
     new Routes("GET","/users",async (req,res)=>{
@@ -36,7 +37,8 @@ const controller = new RouterController([
         }
     }),
 
-
+    const passwordHash = await new PassWord.crypt(password)
+    const values = [nume, passwordHash, userId];
     // new Routes("POST","/user/:id",async (req,res)=>{ ///trebuie catalogat drept nasol ca e post cu id
     //     let body = ''
     //     try{
@@ -50,7 +52,9 @@ const controller = new RouterController([
     //                 res.writeHead(404, {'Content-Type': 'application/json'});
     //                 return res.end(JSON.stringify({error: 'Route Not Found'}));
     //             }
-    //
+    //              const passwordHash = await new PassWord.crypt(password)
+    //              const values = [nume, age, password, JSON.stringify(message)];
+    //              const query = `INSERT INTO users (nume, age, passwordHash, message) VALUES ($1, $2, $3, $4)`;
     //         });
     //
     //     } catch (error){
@@ -59,6 +63,48 @@ const controller = new RouterController([
     //         res.end("Internal Error");
     //     }
     // }),
+//mecanism de logare
+    new Routes("POST","/user/:id/:password",async (req,res)=>{ ///trebuie catalogat drept nasol ca e post cu id
+        let body = ''
+        try{
+
+            req.on('data', (chunk) => {
+                body += chunk.toString();
+            });
+            const parameeters = req.url.split('/').pop();
+            const userId = parameeters[0];
+            const password = parameeters[1];
+
+            req.on('end', async () => {
+                if (userId) {
+                    const values1 = [userId]
+                    const queryPass = `SELECT password FROM users WHERE id = $1`;
+                    const passwordDbHash = await pool.query(queryPass,values1)
+                    const data = [passwordDbHash[0].password]
+                    const passwordHash = await new PassWord.verify(data,password)
+                    if (passwordHash)
+                    {
+                        console.log('Log In succesfull');
+                        res.writeHead(200, {'Content-Type': 'application/json'});
+                        return res.end(JSON.stringify('Log In Succesfull!'));
+                    }else {
+                        console.log('id or password wrong');
+                        res.writeHead(401, {'Content-Type': 'application/json'});
+                        return res.end(JSON.stringify( 'Try again'));
+                    }
+                }else {
+                    res.writeHead(404, {'Content-Type': 'application/json'});
+                    return res.end(JSON.stringify({error: 'Route Not Found'}));
+                }
+
+            });
+
+        } catch (error){
+            console.error("Error inserting user", error);
+            res.writeHead(500);
+            res.end("Internal Error");
+        }
+    }),
     new Routes("POST","/users",async (req,res)=>{
         let body = ''
         try{
@@ -75,9 +121,9 @@ const controller = new RouterController([
                     res.writeHead(400, {'Content-Type': 'application/json'});
                     return res.end(JSON.stringify({error: 'Parametrii incompleți în corpul cererii'}));
                 }
-
+                const passwordHash = await new PassWord.crypt(password)
                 const values = [nume, age, password, JSON.stringify(message)];
-                const query = `INSERT INTO users (nume, age, password, message) VALUES ($1, $2, $3, $4)`;
+                const query = `INSERT INTO users (nume, age, passwordHash, message) VALUES ($1, $2, $3, $4)`;
                 await pool.query(query, values);
 
                 res.writeHead(201, {'Content-Type': 'application/json'});
@@ -110,7 +156,8 @@ const controller = new RouterController([
                     }
 
                     const query = `UPDATE users SET nume = $1, password = $2 WHERE id = $3`;
-                    const values = [nume, password, userId];
+                    const passwordHash = await new PassWord.crypt(password)
+                    const values = [nume, passwordHash, userId];
 
                     await pool.query(query, values);
 
@@ -148,8 +195,8 @@ const controller = new RouterController([
                     }
 
                     const query = `UPDATE users SET nume = $1, password = $2 WHERE id >0`;
-                    const values = [nume, password];
-
+                    const passwordHash = await new PassWord.crypt(password)
+                    const values = [nume, passwordHash];
                     await pool.query(query, values);
 
                     res.writeHead(200, { 'Content-Type': 'application/json' });
