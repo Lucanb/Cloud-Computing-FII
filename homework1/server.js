@@ -37,8 +37,6 @@ const controller = new RouterController([
         }
     }),
 
-    const passwordHash = await new PassWord.crypt(password)
-    const values = [nume, passwordHash, userId];
     // new Routes("POST","/user/:id",async (req,res)=>{ ///trebuie catalogat drept nasol ca e post cu id
     //     let body = ''
     //     try{
@@ -286,7 +284,6 @@ const controller = new RouterController([
             res.end("Eroare internă");
         }
     })
-
 ])
 function setCorsHeaders(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
