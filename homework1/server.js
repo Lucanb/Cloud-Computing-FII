@@ -3,7 +3,6 @@ const fs = require('fs')
 const {config,pool} = require('./config')
 const {Routes,RouterController} = require('./router')
 const path = require('path')
-const {parse} = require("querystring"); //trb sa imi fac eu parser
 
 const controller = new RouterController([
     new Routes("GET","/users",async (req,res)=>{
