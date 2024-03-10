@@ -37,98 +37,70 @@ const controller = new RouterController([
         }
     }),
 
-    // new Routes("POST","/user/:id",async (req,res)=>{ ///trebuie catalogat drept nasol ca e post cu id
-    //     let body = ''
-    //     try{
-    //
-    //         req.on('data', (chunk) => {
-    //             body += chunk.toString();
-    //         });
-    //         const userId = req.url.split('/').pop();
-    //         req.on('end', async () => {
-    //             if (userId) {
-    //                 res.writeHead(404, {'Content-Type': 'application/json'});
-    //                 return res.end(JSON.stringify({error: 'Route Not Found'}));
-    //             }
-    //              const passwordHash = await new PassWord.crypt(password)
-    //              const values = [nume, age, password, JSON.stringify(message)];
-    //              const query = `INSERT INTO users (nume, age, passwordHash, message) VALUES ($1, $2, $3, $4)`;
-    //         });
-    //
-    //     } catch (error){
-    //         console.error("Error inserting user", error);
-    //         res.writeHead(500);
-    //         res.end("Internal Error");
-    //     }
-    // }),
-//mecanism de logare
-    new Routes("POST","/user/:id/:password",async (req,res)=>{ ///trebuie catalogat drept nasol ca e post cu id
+    new Routes("POST","/user/:id",async (req,res)=>{ ///trebuie catalogat drept nasol ca e post cu id
         let body = ''
         try{
 
             req.on('data', (chunk) => {
                 body += chunk.toString();
             });
-            const parameeters = req.url.split('/').pop();
-            const userId = parameeters[0];
-            const password = parameeters[1];
-
+            const userId = req.url.split('/').pop();
             req.on('end', async () => {
                 if (userId) {
-                    const values1 = [userId]
-                    const queryPass = `SELECT password FROM users WHERE id = $1`;
-                    const passwordDbHash = await pool.query(queryPass,values1)
-                    const data = [passwordDbHash[0].password]
-                    const passwordHash = await new PassWord.verify(data,password)
-                    if (passwordHash)
-                    {
-                        console.log('Log In succesfull');
-                        res.writeHead(200, {'Content-Type': 'application/json'});
-                        return res.end(JSON.stringify('Log In Succesfull!'));
-                    }else {
-                        console.log('id or password wrong');
-                        res.writeHead(401, {'Content-Type': 'application/json'});
-                        return res.end(JSON.stringify( 'Try again'));
-                    }
-                }else {
                     res.writeHead(404, {'Content-Type': 'application/json'});
                     return res.end(JSON.stringify({error: 'Route Not Found'}));
                 }
-
             });
 
         } catch (error){
-            console.error("Error inserting user", error);
+            console.error("Error at creating resource", error);
             res.writeHead(500);
             res.end("Internal Error");
         }
     }),
-    new Routes("POST","/users",async (req,res)=>{
-        let body = ''
-        try{
+
+    new Routes("POST", "/users", async (req, res) => {
+        let body = '';
+        try {
             req.on('data', (chunk) => {
                 body += chunk.toString();
             });
 
             req.on('end', async () => {
-                const requestData = parse(body);
+                const requestData = JSON.parse(body);
 
-                const {nume, age, password, message} = requestData;
-
-                if (!nume || !age || !password || !message) {
-                    res.writeHead(400, {'Content-Type': 'application/json'});
-                    return res.end(JSON.stringify({error: 'Parametrii incompleți în corpul cererii'}));
+                if (!Array.isArray(requestData) || requestData.length === 0) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ error: 'Parametrii incompleti în corpul cererii' }));
                 }
-                const passwordHash = await new PassWord.crypt(password)
-                const values = [nume, age, password, JSON.stringify(message)];
-                const query = `INSERT INTO users (nume, age, passwordHash, message) VALUES ($1, $2, $3, $4)`;
-                await pool.query(query, values);
 
-                res.writeHead(201, {'Content-Type': 'application/json'});
-                res.end(JSON.stringify({message: 'User inserted successfully'}));
+                for (const utilizator of requestData) {
+                    const { nume, age, password, message } = utilizator;
+
+                    if (!nume || !age || !password || !message) {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        return res.end(JSON.stringify({ error: 'Parametrii incompleti în corpul cererii' }));
+                    }
+
+                    console.log(nume, age, password, message)
+                    const passwordHash = await PassWord.crypt(password);
+                    const values = [nume, age, passwordHash, JSON.stringify(message)];
+                    const query = `INSERT INTO users (nume, age, password, message) VALUES ($1, $2, $3, $4)`;
+
+                    try {
+                        await pool.query(query, values);
+                    } catch (insertError) {
+                        console.error("Error inserting user", insertError);
+                        res.writeHead(500);
+                        return res.end("Internal Error");
+                    }
+                }
+
+                res.writeHead(201, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: 'Utilizatori adaugati cu succes' }));
             });
 
-        } catch (error){
+        } catch (error) {
             console.error("Error inserting user", error);
             res.writeHead(500);
             res.end("Internal Error");
@@ -138,24 +110,34 @@ const controller = new RouterController([
     new Routes("PUT", "/user/:id", async (req, res) => {
         try {
             const userId = req.url.split('/').pop();
-            console.log(userId)
             let body = '';
             req.on('data', (chunk) => {
                 body += chunk.toString();
             });
             req.on('end', async () => {
                 try {
-                    const requestData = parse(body);
-                    const { nume, password} = requestData;
+                    const requestData = JSON.parse(body);
+                    const updateFields = Object.keys(requestData);
+                    const values = [];
+                    let query = 'UPDATE users SET ';
 
-                    if (!nume && !password) {
-                        res.writeHead(400, { 'Content-Type': 'application/json' });
-                        return res.end(JSON.stringify({ error: 'Niciun parametru de actualizare furnizat în corpul cererii' }));
+                    for (let i = 0; i < updateFields.length; i++) {
+                        const field = updateFields[i];
+                        if (field === 'password') {
+                            const passwordHash = await PassWord.crypt(requestData[field]);
+                            query += `${field} = $${i + 1}`;
+                            values.push(passwordHash);
+                        } else {
+                            query += `${field} = $${i + 1}`;
+                            values.push(requestData[field]);
+                        }
+                        if (i !== updateFields.length - 1) {
+                            query += ', ';
+                        }
                     }
 
-                    const query = `UPDATE users SET nume = $1, password = $2 WHERE id = $3`;
-                    const passwordHash = await new PassWord.crypt(password)
-                    const values = [nume, passwordHash, userId];
+                    query += ' WHERE id = $' + (updateFields.length + 1);
+                    values.push(userId);
 
                     await pool.query(query, values);
 
@@ -176,29 +158,37 @@ const controller = new RouterController([
 
     new Routes("PUT", "/users", async (req, res) => {
         try {
-            // const userId = req.url.split('/').pop();
-            // console.log(userId)
             let body = '';
             req.on('data', (chunk) => {
                 body += chunk.toString();
             });
             req.on('end', async () => {
                 try {
-                    const requestData = parse(body);
-                    const { nume, password} = requestData;
-
-                    if (!nume && !password) {
-                        res.writeHead(400, { 'Content-Type': 'application/json' });
-                        return res.end(JSON.stringify({ error: 'Niciun parametru de actualizare furnizat în corpul cererii' }));
+                    const requestData = JSON.parse(body);
+                    const updateFields = Object.keys(requestData);
+                    const values = [];
+                    let query = 'UPDATE users SET ';
+                    for (let i = 0; i < updateFields.length; i++) {
+                        const field = updateFields[i];
+                        if (field === 'password') {
+                            const passwordHash = await PassWord.crypt(requestData[field]);
+                            query += `${field} = $${i + 1}`;
+                            values.push(passwordHash);
+                        } else {
+                            query += `${field} = $${i + 1}`;
+                            values.push(requestData[field]);
+                        }
+                        if (i !== updateFields.length - 1) {
+                            query += ', ';
+                        }
                     }
 
-                    const query = `UPDATE users SET nume = $1, password = $2 WHERE id >0`;
-                    const passwordHash = await new PassWord.crypt(password)
-                    const values = [nume, passwordHash];
+                    query += ' WHERE id > 0';
+
                     await pool.query(query, values);
 
                     res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ message: 'Utilizator actualizat cu succes' }));
+                    res.end(JSON.stringify({ message: 'Utilizatori actualizati cu succes' }));
                 } catch (parseError) {
                     console.error("Eroare parsare corp cerere", parseError);
                     res.writeHead(400);
@@ -206,7 +196,7 @@ const controller = new RouterController([
                 }
             });
         } catch (error) {
-            console.error("Eroare actualizare utilizator", error);
+            console.error("Eroare actualizare utilizatori", error);
             res.writeHead(500);
             res.end("Eroare internă");
         }
@@ -220,21 +210,10 @@ const controller = new RouterController([
             });
             req.on('end', async () => {
                 try {
-                    // const requestData = parse(body);
-                    // const { id } = requestData;
-                    //
-                    // if (!id) {
-                    //     res.writeHead(400, { 'Content-Type': 'application/json' });
-                    //     return res.end(JSON.stringify({ error: 'ID-ul utilizatorului lipsește din corpul cererii' }));
-                    // }
-                    //
-                    // const query = `DELETE FROM users WHERE id = $1`;
-                    // const values = [id];
                     const query = `DELETE FROM users WHERE id > 0`; //le sterge pe toate
-                    await pool.query(query, values);
-                    // console.log('UserID to delete:', id);
+                    await pool.query(query);
                     res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ message: 'Utilizator șters cu succes' }));
+                    res.end(JSON.stringify({ message: 'Utilizatori stersi cu succes' }));
                 } catch (parseError) {
                     console.error("Eroare parsare corp cerere", parseError);
                     res.writeHead(400);
@@ -242,7 +221,7 @@ const controller = new RouterController([
                 }
             });
         } catch (error) {
-            console.error("Eroare ștergere utilizator", error);
+            console.error("Eroare stergere utilizatori", error);
             res.writeHead(500);
             res.end("Eroare internă");
         }
@@ -257,21 +236,17 @@ const controller = new RouterController([
             });
             req.on('end', async () => {
                 try {
-                    // const requestData = parse(body);
-                    // const { id } = requestData;
-                    //
-                    // if (!id) {
-                    //     res.writeHead(400, { 'Content-Type': 'application/json' });
-                    //     return res.end(JSON.stringify({ error: 'ID-ul utilizatorului lipsește din corpul cererii' }));
-                    // }
-                    //
-                    // const query = `DELETE FROM users WHERE id = $1`;
-                    const values = [userId];
-                    const query = `DELETE FROM users WHERE id = $1`;
-                    await pool.query(query, values);
-                    console.log('UserID to delete:', userId);
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ message: 'Utilizator șters cu succes' }));
+                    if (!userId) {
+                        res.writeHead(400, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'ID-ul utilizatorului lipsește din corpul cererii' }));
+                    }else {
+                        const values = [userId];
+                        const query = `DELETE FROM users WHERE id = $1`;
+                        await pool.query(query, values);
+                        console.log('UserID to delete:', userId);
+                        res.writeHead(200, {'Content-Type': 'application/json'});
+                        res.end(JSON.stringify({message: 'Utilizator sters cu succes'}));
+                    }
                 } catch (parseError) {
                     console.error("Eroare parsare corp cerere", parseError);
                     res.writeHead(400);
@@ -279,7 +254,7 @@ const controller = new RouterController([
                 }
             });
         } catch (error) {
-            console.error("Eroare ștergere utilizator", error);
+            console.error("Eroare stergere utilizator", error);
             res.writeHead(500);
             res.end("Eroare internă");
         }
