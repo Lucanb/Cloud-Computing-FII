@@ -79,25 +79,42 @@ controller.addRoute(new Routes("POST", "/users", async (req, res) => {
                 }
 
                 for (const myUsers of requestData) {
-                    const { nume, age, password, message } = myUsers;
+                    const { username, age, password, message } = myUsers;
 
-                    if (!nume || !age || !password || !message) {
+                    if (!username || !age || !password || !message) {
                         res.writeHead(400, { 'Content-Type': 'application/json' });
                         return res.end(JSON.stringify({ error: 'Incomplete parameters in the error body' }));
                     }
 
-                    console.log(nume, age, password, message)
+                    console.log(username, age, password, message)
                     const passwordHash = await PassWord.crypt(password);
-                    const values = [nume, age, passwordHash, JSON.stringify(message)];
-                    const query = `INSERT INTO users (nume, age, password, message) VALUES ($1, $2, $3, $4)`;
+
+                    const value = [username];
+                    const selectQuery = `SELECT id FROM users WHERE username = $1`;
 
                     try {
-                        await pool.query(query, values);
+                        const rows = await pool.query(selectQuery, value)
+                        if (rows.rowCount > 0) {
+                            console.log('username already exists');
+                        } else {
+                            const values = [username, age, passwordHash, JSON.stringify(message)];
+                            const query = `INSERT INTO users (username, age, password, message) VALUES ($1, $2, $3, $4)`;
+
+                            try {
+                                await pool.query(query, values);
+                            } catch (insertError) {
+                                console.error("Error inserting user", insertError);
+                                res.writeHead(500);
+                                return res.end("Internal Error");
+                            }
+                        }
+
                     } catch (insertError) {
-                        console.error("Error inserting user", insertError);
+                        console.error("Error verifying the existence of users", insertError);
                         res.writeHead(500);
                         return res.end("Internal Error");
                     }
+
                 }
 
                 res.writeHead(201, { 'Content-Type': 'application/json' });
