@@ -1,9 +1,3 @@
-http = require("follow-redirects").https;
-const requestLib = require("request").defaults({
-    encoding: null,
-});
-const config = require("./config");
-const fs = require("fs")
 class Routes
 {
     constructor(method,path,handler) {

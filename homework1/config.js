@@ -1,6 +1,5 @@
 const { Pool } = require('pg');
 
-// Configurare pentru conexiunea la baza de date PostgreSQL
 const pool = new Pool({
     user: 'postgres',
     host: 'localhost',
@@ -9,7 +8,7 @@ const pool = new Pool({
     port: 5432,
 });
 
-var config = {};
+const config = {};
 
 config.PORT = 8080;
 config.HOSTNAME = '127.0.1';

@@ -1,8 +1,6 @@
 const http = require('http')
-const fs = require('fs')
 const {config,pool} = require('./config')
 const {Routes,RouterController} = require('./router')
-const path = require('path')
 const PassWord = require('./password')
 
 const controller = new RouterController([
@@ -37,7 +35,7 @@ const controller = new RouterController([
         }
     }),
 
-    new Routes("POST","/user/:id",async (req,res)=>{ ///trebuie catalogat drept nasol ca e post cu id
+    new Routes("POST","/user/:id",async (req,res)=>{
         let body = ''
         try{
 
@@ -48,7 +46,7 @@ const controller = new RouterController([
             req.on('end', async () => {
                 if (userId) {
                     res.writeHead(404, {'Content-Type': 'application/json'});
-                    return res.end(JSON.stringify({error: 'Route Not Found'}));
+                    return res.end(JSON.stringify({error: 'Bad Request'}));
                 }
             });
 
@@ -71,15 +69,15 @@ const controller = new RouterController([
 
                 if (!Array.isArray(requestData) || requestData.length === 0) {
                     res.writeHead(400, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ error: 'Parametrii incompleti în corpul cererii' }));
+                    return res.end(JSON.stringify({ error: 'Incomplete parameters in the error body' }));
                 }
 
-                for (const utilizator of requestData) {
-                    const { nume, age, password, message } = utilizator;
+                for (const myUsers of requestData) {
+                    const { nume, age, password, message } = myUsers;
 
                     if (!nume || !age || !password || !message) {
                         res.writeHead(400, { 'Content-Type': 'application/json' });
-                        return res.end(JSON.stringify({ error: 'Parametrii incompleti în corpul cererii' }));
+                        return res.end(JSON.stringify({ error: 'Incomplete parameters in the error body' }));
                     }
 
                     console.log(nume, age, password, message)
@@ -97,7 +95,7 @@ const controller = new RouterController([
                 }
 
                 res.writeHead(201, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ message: 'Utilizatori adaugati cu succes' }));
+                res.end(JSON.stringify({ message: 'Users successfully added' }));
             });
 
         } catch (error) {
@@ -142,17 +140,17 @@ const controller = new RouterController([
                     await pool.query(query, values);
 
                     res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ message: 'Utilizator actualizat cu succes' }));
+                    res.end(JSON.stringify({ message: 'User updated successfully' }));
                 } catch (parseError) {
-                    console.error("Eroare parsare corp cerere", parseError);
+                    console.error("Request body parsing error", parseError);
                     res.writeHead(400);
-                    res.end("Eroare de parsare a corpului cererii");
+                    res.end("Error parsing request body");
                 }
             });
         } catch (error) {
-            console.error("Eroare actualizare utilizator", error);
+            console.error("Error updating user", error);
             res.writeHead(500);
-            res.end("Eroare internă");
+            res.end("Internal error");
         }
     }),
 
@@ -164,19 +162,19 @@ const controller = new RouterController([
             });
             req.on('end', async () => {
                 try {
-                    const requestData = JSON.parse(body);
-                    const updateFields = Object.keys(requestData);
+                    const requestsData = JSON.parse(body);
+                    const updateFields = Object.keys(requestsData);
                     const values = [];
                     let query = 'UPDATE users SET ';
                     for (let i = 0; i < updateFields.length; i++) {
                         const field = updateFields[i];
                         if (field === 'password') {
-                            const passwordHash = await PassWord.crypt(requestData[field]);
+                            const passwordHash = await PassWord.crypt(requestsData[field]);
                             query += `${field} = $${i + 1}`;
                             values.push(passwordHash);
                         } else {
                             query += `${field} = $${i + 1}`;
-                            values.push(requestData[field]);
+                            values.push(requestsData[field]);
                         }
                         if (i !== updateFields.length - 1) {
                             query += ', ';
@@ -188,17 +186,17 @@ const controller = new RouterController([
                     await pool.query(query, values);
 
                     res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ message: 'Utilizatori actualizati cu succes' }));
+                    res.end(JSON.stringify({ message: 'Users updated successfully' }));
                 } catch (parseError) {
-                    console.error("Eroare parsare corp cerere", parseError);
+                    console.error("Request body parsing error", parseError);
                     res.writeHead(400);
-                    res.end("Eroare de parsare a corpului cererii");
+                    res.end("Error parsing request body");
                 }
             });
         } catch (error) {
-            console.error("Eroare actualizare utilizatori", error);
+            console.error("Error updating users", error);
             res.writeHead(500);
-            res.end("Eroare internă");
+            res.end("Internal error");
         }
     }),
 
@@ -210,20 +208,20 @@ const controller = new RouterController([
             });
             req.on('end', async () => {
                 try {
-                    const query = `DELETE FROM users WHERE id > 0`; //le sterge pe toate
+                    const query = `DELETE FROM users WHERE id > 0`;
                     await pool.query(query);
                     res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ message: 'Utilizatori stersi cu succes' }));
+                    res.end(JSON.stringify({ message: 'Users deleted successfully' }));
                 } catch (parseError) {
-                    console.error("Eroare parsare corp cerere", parseError);
+                    console.error("Request body parsing error", parseError);
                     res.writeHead(400);
-                    res.end("Eroare de parsare a corpului cererii");
+                    res.end("Error parsing request body");
                 }
             });
         } catch (error) {
-            console.error("Eroare stergere utilizatori", error);
+            console.error("Error deleting users", error);
             res.writeHead(500);
-            res.end("Eroare internă");
+            res.end("Internal error");
         }
     }),
     new Routes("DELETE", "/user/:id", async (req, res) => {
@@ -238,43 +236,43 @@ const controller = new RouterController([
                 try {
                     if (!userId) {
                         res.writeHead(400, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ error: 'ID-ul utilizatorului lipsește din corpul cererii' }));
+                        res.end(JSON.stringify({ error: 'The user ID is missing from the request body' }));
                     }else {
                         const values = [userId];
                         const query = `DELETE FROM users WHERE id = $1`;
                         await pool.query(query, values);
                         console.log('UserID to delete:', userId);
                         res.writeHead(200, {'Content-Type': 'application/json'});
-                        res.end(JSON.stringify({message: 'Utilizator sters cu succes'}));
+                        res.end(JSON.stringify({message: 'User deleted successfully'}));
                     }
                 } catch (parseError) {
-                    console.error("Eroare parsare corp cerere", parseError);
+                    console.error("Request body parsing error", parseError);
                     res.writeHead(400);
-                    res.end("Eroare de parsare a corpului cererii");
+                    res.end("Error parsing request body");
                 }
             });
         } catch (error) {
-            console.error("Eroare stergere utilizator", error);
+            console.error("Error deleting user", error);
             res.writeHead(500);
-            res.end("Eroare internă");
+            res.end("Internal error");
         }
     })
 ])
-function setCorsHeaders(req, res) {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Request-Method", "*");
-    res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, DELETE");
-    res.setHeader("Access-Control-Max-Age", 3600);
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers");
-}
+// function setCorsHeaders(req, res) {
+//     res.setHeader("Access-Control-Allow-Origin", "*");
+//     res.setHeader("Access-Control-Request-Method", "*");
+//     res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, DELETE");
+//     res.setHeader("Access-Control-Max-Age", 3600);
+//     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers");
+// }
 const server = http.createServer(async (req,res)=>{
     if (req.method === 'OPTIONS')
     {
-        setCorsHeaders(req,res)
+        // setCorsHeaders(req,res)
         res.writeHead(204)
         res.end()
     }else{
-        setCorsHeaders(req,res)
+        // setCorsHeaders(req,res)
         try{
             await controller.handleRequest(req,res)
         } catch (error) {
