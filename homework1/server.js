@@ -4,7 +4,12 @@ const {Routes,RouterController} = require('./router')
 const PassWord = require('./password')
 
 const controller = new RouterController([
-    new Routes("GET","/users",async (req,res)=>{
+    new Routes("GET","/index",async (req,res)=>{
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify('Welcome!'));
+    })
+])
+controller.addRoute(new Routes("GET","/users",async (req,res)=>{
         try {
             const query = `SELECT * FROM users`;
             const result = await pool.query(query)
@@ -16,9 +21,9 @@ const controller = new RouterController([
             res.writeHead(500);
             res.end("Internal Error");
         }
-    }),
-
-    new Routes("GET","/user/:id",async (req,res)=>{
+    })
+);
+controller.addRoute( new Routes("GET","/user/:id",async (req,res)=>{
         try {
             const userId = req.url.split('/').pop();
             console.log(userId)
@@ -33,9 +38,9 @@ const controller = new RouterController([
             res.writeHead(500);
             res.end("Internal Error");
         }
-    }),
-
-    new Routes("POST","/user/:id",async (req,res)=>{
+    })
+);
+controller.addRoute(new Routes("POST","/user/:id",async (req,res)=>{
         let body = ''
         try{
 
@@ -55,9 +60,10 @@ const controller = new RouterController([
             res.writeHead(500);
             res.end("Internal Error");
         }
-    }),
+    })
+);
 
-    new Routes("POST", "/users", async (req, res) => {
+controller.addRoute(new Routes("POST", "/users", async (req, res) => {
         let body = '';
         try {
             req.on('data', (chunk) => {
@@ -103,9 +109,10 @@ const controller = new RouterController([
             res.writeHead(500);
             res.end("Internal Error");
         }
-    }),
+    })
+);
 
-    new Routes("PUT", "/user/:id", async (req, res) => {
+controller.addRoute(new Routes("PUT", "/user/:id", async (req, res) => {
         try {
             const userId = req.url.split('/').pop();
             let body = '';
@@ -152,9 +159,10 @@ const controller = new RouterController([
             res.writeHead(500);
             res.end("Internal error");
         }
-    }),
+    })
+);
 
-    new Routes("PUT", "/users", async (req, res) => {
+controller.addRoute(new Routes("PUT", "/users", async (req, res) => {
         try {
             let body = '';
             req.on('data', (chunk) => {
@@ -198,9 +206,10 @@ const controller = new RouterController([
             res.writeHead(500);
             res.end("Internal error");
         }
-    }),
+    })
+);
 
-    new Routes("DELETE", "/users", async (req, res) => {
+controller.addRoute(new Routes("DELETE", "/users", async (req, res) => {
         try {
             let body = '';
             req.on('data', (chunk) => {
@@ -223,8 +232,10 @@ const controller = new RouterController([
             res.writeHead(500);
             res.end("Internal error");
         }
-    }),
-    new Routes("DELETE", "/user/:id", async (req, res) => {
+    })
+);
+
+controller.addRoute(new Routes("DELETE", "/user/:id", async (req, res) => {
         try {
             let body = '';
             const userId = req.url.split('/').pop();
@@ -257,7 +268,7 @@ const controller = new RouterController([
             res.end("Internal error");
         }
     })
-])
+);
 // function setCorsHeaders(req, res) {
 //     res.setHeader("Access-Control-Allow-Origin", "*");
 //     res.setHeader("Access-Control-Request-Method", "*");
