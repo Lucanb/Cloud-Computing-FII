@@ -1,9 +1,9 @@
 import './App.css';
-import SigIn from "./pages/auth/Login/SigIn";
-import SignUp from "./pages/auth/Register/SignUp";
+import SigIn from "./pages/authentification/SignIn/SigIn";
+import SignUp from "./pages/authentification/SignUp/SignUp";
 import Home from "./pages/Home";
 import NavBar from "./components/NavBar";
-import AuthenticationDetails from "./pages/auth/authenticationDetails";
+import AuthenticationDetails from "./pages/authentification/authenticationDetails";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import axios from 'axios';
 import { useEffect } from "react";
