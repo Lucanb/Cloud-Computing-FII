@@ -1,20 +1,14 @@
+import './App.css';
 import SigIn from "./pages/auth/Login/SigIn";
 import SignUp from "./pages/auth/Register/SignUp";
-import Home from "./pages/app/Home";
+import Home from "./pages/Home";
 import NavBar from "./components/NavBar";
 import AuthenticationDetails from "./pages/auth/authenticationDetails";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import axios from 'axios';
-import {useEffect} from "react";
-function App() {
+import { useEffect } from "react";
 
-    return (
-        <div className="App">
-            <SigIn />
-            <SignUp />
-            <AuthenticationDetails/>
-        </div>
-    );
+function App() {
     useEffect(() => {
         axios.get("http://localhost:5000/api/todos")
             .then(response => {
@@ -28,7 +22,7 @@ function App() {
     return (
         <div className="App">
             <Router>
-                <NavBar />
+                <NavBar /> {/* Afișăm Navbar în afara componentei Routes */}
                 <Routes>
                     <Route exact path="/" element={<Home />} />
                     <Route exact path="/login" element={<SigIn />} />
