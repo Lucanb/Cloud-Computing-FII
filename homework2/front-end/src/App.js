@@ -3,11 +3,13 @@ import SigIn from "./pages/authentification/SignIn/SigIn";
 import SignUp from "./pages/authentification/SignUp/SignUp";
 import Home from "./pages/Home";
 import NavBar from "./components/NavBar";
+import Auth from "../src/components/auth"
 import AuthenticationDetails from "./pages/authentification/authenticationDetails";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import axios from 'axios';
 import { useEffect } from "react";
 
+const token = 'Bearer 1234';
 function App() {
     useEffect(() => {
         axios.get("http://localhost:5000/api/todos")
@@ -27,6 +29,7 @@ function App() {
                     <Route exact path="/" element={<Home />} />
                     <Route exact path="/login" element={<SigIn />} />
                     <Route exact path="/signup" element={<SignUp />} />
+                    <Route exact path="/auth" element={<Auth token = {token}/>} />
                 </Routes>
             </Router>
             {/*<AuthenticationDetails/>*/}

@@ -1,14 +1,15 @@
-// server.mjs
 import express from "express";
 import cors from "cors";
-import axios from "axios";
+import { decodeToken } from "./middleware/index.js";
 
 const app = express();
 const port = 5000;
 
 app.use(cors());
+app.use(decodeToken); // Utilizați funcția de middleware importată
 
 app.get('/login', (req, res) => {
+    console.log(req.headers.authorization);
     return res.json({
         todos: [
             {
