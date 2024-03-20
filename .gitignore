@@ -1,1 +1,6 @@
-/homework1/node_modules
+# Ignore node_modules directory
+**/node_modules/
+
+# Ignore package-lock.json (for npm) or yarn.lock (for Yarn)
+**/package-lock.json
+**/yarn.lock
