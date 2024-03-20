@@ -8,24 +8,6 @@ const port = 5000;
 app.use(cors());
 app.use(express.json());
 
-// app.get('/login', (req, res) => {
-//     console.log(req.headers.authorization);
-//     res.setHeader('Content-Type', 'application/json');
-//     return res.json({
-//         todos: [
-//             {
-//                 title: "task1",
-//             },
-//             {
-//                 title: "task2",
-//             },
-//             {
-//                 title: "task3",
-//             }
-//         ]
-//     });
-// });
-
 app.post('/login', decodeToken, (req, res) => {
 
     console.log("Token decoded:", req.value);

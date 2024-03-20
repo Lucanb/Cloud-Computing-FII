@@ -1,9 +1,13 @@
-import React, {useState} from "react";
-import  {auth}  from "../../../firebase";
-import {signInWithEmailAndPassword} from "firebase/auth";
+import React, { useState } from "react";
+import { Navigate } from "react-router-dom";
+import { auth } from "../../../firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+
 const SignIn = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState(null);
+    let [isLoggedIn, setIsLoggedIn] = useState(false); // Stare pentru a indica dacă utilizatorul s-a autentificat cu succes
 
     const signIn = async (e) => {
         e.preventDefault();
@@ -24,21 +28,32 @@ const SignIn = () => {
             const data = await response.json();
             console.log("Response from server:", data);
 
+            if (response.status === 200) {  //poate sa vad daca ce a trimis sv e valid (oare status-ul poate fi falsificat??)
+                setIsLoggedIn(true);
+                isLoggedIn = true;
+            }
+
         } catch (error) {
             console.error("Error signing in:", error.message);
+            setError("Authentication failed. Please check your credentials.");
         }
     };
-    return(
+
+    if (isLoggedIn) {
+        return <Navigate to="/home" />;
+    }
+
+    return (
         <div className={"sign-in-container"}>
-        <form onSubmit={signIn}>
-        <h1>Log In</h1>
-            <input type={"email"} placeholder={"Enter your email"} value={email} onChange={e=>setEmail(e.target.value)}/>
-            <input type={"password"} placeholder={"Enter your password"} value={password} onChange={e=>setPassword(e.target.value)}/>
-            <button type={"submit"}>Log In</button>
-        </form>
+            <form onSubmit={signIn}>
+                <h1>Log In</h1>
+                <input type={"email"} placeholder={"Enter your email"} value={email} onChange={e => setEmail(e.target.value)} />
+                <input type={"password"} placeholder={"Enter your password"} value={password} onChange={e => setPassword(e.target.value)} />
+                {error && <p style={{ color: 'red' }}>{error}</p>}
+                <button type={"submit"}>Log In</button>
+            </form>
         </div>
     );
 };
 
-
-export default SignIn
+export default SignIn;

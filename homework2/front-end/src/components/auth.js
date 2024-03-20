@@ -8,7 +8,7 @@ function VerificationToken({ token }) { // Renamed to follow PascalCase conventi
         }
     }, [token]);
 
-    const fetchData = async () => {
+    const fetchData = async (token) => {
         try {
             const res = await axios.get("http://localhost:5000/login",{
                 headers:{
