@@ -1,7 +1,9 @@
 import admin from "../config/firebase-config.js";
 
 async function decodeToken(req, res, next) {
-    const token = req.headers.authorization.split(' ')[1];
+
+    // const token = req.headers.authorization.split(' ')[1];
+    const token = "1231"
     try {
         const decode = await admin.auth().verifyIdToken(token);
         if (decode) {
