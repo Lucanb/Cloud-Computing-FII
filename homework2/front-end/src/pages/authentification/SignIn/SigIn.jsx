@@ -1,18 +1,36 @@
 import React, {useState} from "react";
 import  {auth}  from "../../../firebase";
 import {signInWithEmailAndPassword} from "firebase/auth";
-const SigIn = () =>{
-    const [email,setEmail] = useState("")
-    const [password,setPassword] = useState("")
-    
-    const signIn = (e)=>{
+const SignIn = () => {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const signIn = async (e) => {
         e.preventDefault();
-        signInWithEmailAndPassword(auth,email,password)
-            .then((userCredentials)=>{
-            console.log(userCredentials)
-        }).catch((error)=>{
-            console.log(error);
-        });
+        try {
+            // Autentificare utilizator în Firebase
+            const userCredentials = await signInWithEmailAndPassword(auth, email, password);
+            console.log("User logged in:", userCredentials.user);
+
+            // Obține token-ul utilizatorului
+            const idToken = await userCredentials.user.getIdToken();
+            console.log("User token:", idToken);
+
+            // Trimite token-ul către serverul Express în antetul de autorizare
+            const response = await fetch("http://localhost:5000/login", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}` // Adăugăm token-ul în antetul de autorizare
+                },
+            });
+            const data = await response.json();
+            console.log("Response from server:", data);
+
+            // Poți lua acțiuni în funcție de răspunsul primit de la server
+        } catch (error) {
+            console.error("Error signing in:", error.message);
+        }
     };
     return(
         <div className={"sign-in-container"}>
@@ -27,4 +45,4 @@ const SigIn = () =>{
 };
 
 
-export default SigIn
+export default SignIn
