@@ -8,26 +8,22 @@ const SignIn = () => {
     const signIn = async (e) => {
         e.preventDefault();
         try {
-            // Autentificare utilizator în Firebase
             const userCredentials = await signInWithEmailAndPassword(auth, email, password);
             console.log("User logged in:", userCredentials.user);
 
-            // Obține token-ul utilizatorului
             const idToken = await userCredentials.user.getIdToken();
             console.log("User token:", idToken);
 
-            // Trimite token-ul către serverul Express în antetul de autorizare
             const response = await fetch("http://localhost:5000/login", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}` // Adăugăm token-ul în antetul de autorizare
+                    'Authorization': `Bearer ${idToken}`
                 },
             });
             const data = await response.json();
             console.log("Response from server:", data);
 
-            // Poți lua acțiuni în funcție de răspunsul primit de la server
         } catch (error) {
             console.error("Error signing in:", error.message);
         }

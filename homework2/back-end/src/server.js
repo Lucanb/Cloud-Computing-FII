@@ -6,7 +6,7 @@ const app = express();
 const port = 5000;
 
 app.use(cors());
-// app.use(decodeToken);
+app.use(express.json());
 
 // app.get('/login', (req, res) => {
 //     console.log(req.headers.authorization);
@@ -26,12 +26,15 @@ app.use(cors());
 //     });
 // });
 
-app.post('/login', (req, res) => {
-    const token = req.headers.authorization.split(' ')[1];
-    console.log("Token received:", token);
+app.post('/login', decodeToken, (req, res) => {
 
-    // Trimite un răspuns către client pentru a confirma recepționarea token-ului
-    res.status(200).json({ message: 'Token received', token });
+    console.log("Token decoded:", req.value);
+
+    // În acest exemplu, vom trimite înapoi către client detaliile token-ului decodat și un mesaj de confirmare
+    res.status(200).json({
+        message: 'Token decoded successfully',
+        tokenData: req.value
+    });
 });
 
 const server = app.listen(port, () => {
