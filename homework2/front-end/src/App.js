@@ -5,7 +5,8 @@ import Home from "./pages/Home";
 import NavBar from "./components/NavBar";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
-
+import { Protected } from './middleware/Protected';
+import {AuthContext} from "../src/middleware/index"
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -21,12 +22,14 @@ function App() {
         <div className="App">
             <Router>
                 <NavBar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
-                <Routes>
-                    <Route exact path="/" element={<Home />} />
-                    <Route exact path="/login" element={<SigIn onLogin={handleLogin} />} />
-                    <Route exact path="/signup" element={<SignUp />} />
-                    <Route exact path="/home" element={<Home />} />
-                </Routes>
+                <AuthContext> {/* Încapsulează întreaga aplicație în contextul de autentificare */}
+                    <Routes>
+                        {/*<Route exact path="/" element={<Home />} />*/}
+                        <Route exact path="/login" element={<SigIn onLogin={handleLogin} />} />
+                        <Route exact path="/signup" element={<SignUp />} />
+                        <Route path="/home" element={<Protected><Home /></Protected>} /> {/* Protejează ruta /home utilizând Protected */}
+                    </Routes>
+                </AuthContext>
             </Router>
         </div>
     );
