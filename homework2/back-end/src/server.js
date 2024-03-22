@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { decodeToken } from "./middleware/index.js";
+import { connectDB } from './config/mongoDB.js';
 
 const app = express();
 const port = 5000;
@@ -18,6 +19,18 @@ app.post('/login', decodeToken, (req, res) => {
         tokenData: req.value
     });
 });
+
+connectDB()
+    .then(() => {
+
+        const port = process.env.PORT || 3000;
+        app.listen(port, () => {
+            console.log(`Serverul a pornit și ascultă pe portul ${port}`);
+        });
+    })
+    .catch((error) => {
+        console.error('Eroare de conectare la baza de date:', error);
+    });
 
 const server = app.listen(port, () => {
     console.log(`Server is running at port ${port}`);
