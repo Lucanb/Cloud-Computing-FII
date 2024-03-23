@@ -6,7 +6,9 @@ import Player from "../components/musicContainer";
 
 const MusicPage = () => {
     const [songs, setSongs] = useState(audios);
-
+    const getSongs = (song) => {
+        console.log(song);
+    }
     return (
         <div>
             <div className={"player-main"}>
@@ -14,7 +16,7 @@ const MusicPage = () => {
             </div>
             <div className="music-play-container">
                 {songs.map((song, index) => (
-                    <Player key={index} song={song} />
+                    <Player key={index} song={song} getSongs={getSongs}/>
                 ))}
             </div>
         </div>
