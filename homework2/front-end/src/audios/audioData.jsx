@@ -1,0 +1,32 @@
+export const audios = [
+    {
+        name:"Audio1",
+        album:"Album1",
+        artist:"Artist1",
+        image:"Image1"
+    },
+    {
+        name:"Audio2",
+        album:"Album2",
+        artist:"Artist2",
+        image:"Image2"
+    },
+    {
+        name:"Audio3",
+        album:"Album3",
+        artist:"Artist3",
+        image:"Image3"
+    },
+    {
+        name:"Audio4",
+        album:"Album4",
+        artist:"Artist4",
+        image:"Image4"
+    },
+    {
+        name:"Audio5",
+        album:"Album5",
+        artist:"Artist5",
+        image:"Image5"
+    }
+]

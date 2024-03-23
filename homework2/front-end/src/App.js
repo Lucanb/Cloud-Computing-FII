@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 // import { Protected } from './middleware/Protected';
 import {AuthContext} from "../src/middleware/index"
+import MusicPage from "./pages/MusicPage"
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -30,6 +31,7 @@ function App() {
                         <Route exact path="/signup" element={<SignUp />} />
                         {/*<Route path="/home" element={<Protected><Home /></Protected>} />*/}
                         <Route exact path="/home" element={<Home />} />
+                        <Route exact path="/music" element={<MusicPage />} />
                     </Routes>
                 </AuthContext>
             </Router>

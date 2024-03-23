@@ -23,7 +23,7 @@ app.post('/login', decodeToken, (req, res) => {
 connectDB()
     .then(() => {
 
-        const port = process.env.PORT || 3000;
+        const port = process.env.PORT || 3001;
         app.listen(port, () => {
             console.log(`Serverul a pornit și ascultă pe portul ${port}`);
         });
