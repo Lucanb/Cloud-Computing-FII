@@ -9,7 +9,7 @@
 .player-container {
     text-align: center;
     font-family: "Poppins", sans-serif;
-    background-color: white;
+    background-color: beige;
     padding: 5px;
     margin: 5px;
     cursor: pointer;
@@ -34,6 +34,8 @@
     position: fixed;
     bottom: 0;
     width: 100%;
+    height: 350px;
+    overflow-y: auto;
 }
 
 .player-aspect{
@@ -87,4 +89,39 @@
     top: 60px;
     left: 50%;
     transform: translate(-50%,0);
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    height: 10px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+}
+
+.pagination li {
+    margin: 0 5px;
+}
+
+.pagination a {
+    cursor: pointer;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+}
+
+.pagination a:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination .active a {
+    background-color: #333;
+    color: #fff;
 }
