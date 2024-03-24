@@ -9,6 +9,7 @@ import { useState } from "react";
 // import { Protected } from './middleware/Protected';
 import {AuthContext} from "../src/middleware/index"
 import MusicPage from "./pages/MusicPage"
+import ArtistPage from "./pages/ArtistPage";
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -32,6 +33,7 @@ function App() {
                         {/*<Route path="/home" element={<Protected><Home /></Protected>} />*/}
                         <Route exact path="/home" element={<Home />} />
                         <Route exact path="/music" element={<MusicPage />} />
+                        <Route exact path="/artist" element={<ArtistPage />} />
                     </Routes>
                 </AuthContext>
             </Router>

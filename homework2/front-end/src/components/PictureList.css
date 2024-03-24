@@ -1,0 +1,17 @@
+.image-list-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.image-list {
+    display: flex;
+    gap: 10px;
+}
+
+.image-item {
+    flex: 0 0 auto;
+}
+
+.image-item img {
+    max-width: 100%;
+}
