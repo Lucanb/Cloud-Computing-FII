@@ -43,11 +43,99 @@ router.post("/save", async (req, res) => {
     }
 });
 router.get("/getAll", async (req, res) => {
-    return res.json({ message: "getting the songs" });
+    try {
+        const allArtists = await song.find();
+        return res.json(allArtists);
+    } catch (error) {
+        return res.status(500).json({ success: false, msg: "A apărut o eroare la obținerea tuturor artiștilor." });
+    }
 });
 
 router.get("/getOne/:id", async (req, res) => {
-    return res.json({ message: "getting the songs" });
+    const filter = { _id: req.params.id };
+
+    try {
+        const artist = await song.findOne(filter);
+
+        if (artist) {
+            return res.status(200).send({succes : true,artist : artist});
+        } else {
+            return res.status(400).json({ success: false ,message: "Artistul nu a fost găsit." });
+        }
+    } catch (error) {
+        return res.status(400).json({ success: false, msg: error.message });
+    }
 });
 
+router.delete("/deleteAll", async (req, res) => {
+    try {
+        const deletedArtists = await song.deleteMany({});
+        if (!deletedArtists) {
+            return res.status(404).json({ success: false, message: "Nu s-au găsit obiecte de șters." });
+        }
+        return res.status(200).json({ success: true, message: "Toate obiectele au fost șterse cu succes." });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Eroare la ștergerea obiectelor." });
+    }
+});
+router.delete("/deleteOne/:id", async (req, res) => {
+    const artistId = req.params.id;
+
+    try {
+        const artist = await Artist.findById(artistId);
+        if (!artist) {
+            return res.status(404).json({ success: false, message: "Artistul nu a fost găsit." });
+        }
+
+        const songs = await song.find({ artist: artistId });
+        if (songs.length > 0) {
+            await song.deleteMany({ artist: artistId });
+        }
+
+        const albums = await Album.find({ artist: artistId });
+        if (albums.length > 0) {
+            for (const album of albums) {
+                await song.deleteMany({ album: album._id });
+            }
+            await Album.deleteMany({ artist: artistId });
+        }
+
+        // Șterge artistul
+        await Artist.findByIdAndDelete(artistId);
+
+        return res.status(200).json({ success: true, message: "Artistul și toate datele asociate au fost șterse cu succes." });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Eroare la ștergerea artistului și a datelor asociate." });
+    }
+});
+
+
+router.delete("/deleteAll", async (req, res) => {
+    try {
+        await Song.deleteMany({});
+
+        await Album.deleteMany({});
+
+        await Artist.deleteMany({});
+
+        return res.status(200).json({ success: true, message: "Toate obiectele și datele asociate au fost șterse cu succes." });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Eroare la ștergerea obiectelor și a datelor asociate." });
+    }
+});
+
+router.put("/updateOne/:id", async (req, res) => {
+    const artistId = req.params.id;
+    const updatedData = req.body;
+
+    try {
+        const updatedArtist = await song.findByIdAndUpdate(artistId, updatedData, { new: true });
+        if (!updatedArtist) {
+            return res.status(404).json({ success: false, message: "Artistul nu a fost găsit." });
+        }
+        return res.status(200).json({ success: true, artist: updatedArtist });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Eroare la actualizarea artistului." });
+    }
+});
 export default router;
