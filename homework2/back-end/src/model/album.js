@@ -9,8 +9,8 @@ const albumSchema = new mongoose.Schema({
         type : Date,
         required: true
     },
-    artistId: {
-        type: mongoose.Schema.Types.ObjectId,
+    artist: {
+        type: String,
         required: true
     },
     link:{
@@ -19,4 +19,4 @@ const albumSchema = new mongoose.Schema({
     }
 },{timestamps : true});
 
-module.exports = mongoose.model("album",albumSchema);
+export default mongoose.model("album",albumSchema);

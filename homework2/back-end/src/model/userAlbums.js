@@ -2,14 +2,12 @@ import mongoose from "mongoose";
 
 
 const userArtistSchema = new mongoose.Schema({
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+    user: {
+        type: String,
         required: true
     },
-    artistId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Artist',
+    artist: {
+        type: String,
         required: true
     }
 },{timestamps : true});

@@ -27,25 +27,16 @@ app.get("/",(req,res)=>{
     return res.json("hai there...");
 })
 
-// const artistsRoutes = require('./routes/artist.js')
-// app.use("api/artist/", artistsRoutes);
+app.use("/api/albums", albumsRoutes); // Fix the route prefix here
+app.use("/api/artists", artistsRoutes);
+app.use("/api/songs", songsRoutes);
 
-app.use("api/albums", albumsRoutes);
-app.use("api/artists", artistsRoutes);
-app.use("api/songs", songsRoutes);
-
-// connectDB()
-//     .then(() => {
-//
-//         const port = process.env.PORT || 3001;
-//         app.listen(port, () => {
-//             console.log(`Serverul a pornit și ascultă pe portul ${port}`);
-//         });
-//     })
-//     .catch((error) => {
-//         console.error('Eroare de conectare la baza de date:', error);
-//     });
-//
-const server = app.listen(port, () => {
-    console.log(`Server is running at port ${port}`);
-});
+connectDB()
+    .then(() => {
+        const server = app.listen(port, () => {
+            console.log(`Server is running at port ${port}`);
+        });
+    })
+    .catch((error) => {
+        console.error('Eroare de conectare la baza de date:', error);
+    });

@@ -5,14 +5,12 @@ const songSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    artistId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Artist',
+    artist: {
+        type: String,
         required: true
     },
-    albumId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Album',
+    album: {
+        type: String,
         required: true
     },
     releaseDate: {
@@ -29,4 +27,4 @@ const songSchema = new mongoose.Schema({
     }
 },{timestamps : true});
 
-module.exports = mongoose.model("song",songSchema);
+export default mongoose.model("song",songSchema);
