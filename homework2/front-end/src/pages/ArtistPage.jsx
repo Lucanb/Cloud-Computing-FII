@@ -1,22 +1,20 @@
-// ArtistPage.jsx
 import React, { useState, useEffect } from 'react';
 
-const ArtistPage = () => {
+const ArtistPage = ({ artistId }) => {
     const [artistData, setArtistData] = useState(null);
 
     useEffect(() => {
-        // Fetch artist data
         fetchArtistData();
     }, []);
 
     const fetchArtistData = async () => {
         try {
-            const response = await fetch('URL_API');
+            const response = await fetch(`http://localhost:5000/api/artists/getOne/${artistId}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
-            setArtistData(data);
+            setArtistData(data.artist);
         } catch (error) {
             console.error('Error fetching artist data:', error);
         }
@@ -40,9 +38,9 @@ const ArtistPage = () => {
             <div className="album-list">
                 {albums.map((album, index) => (
                     <div className="album-item" key={index} onClick={() => handleAlbumClick(album)}>
-                        <h3>{album.name}</h3>
-                        <p>{album.releaseYear}</p>
-                        <img src={album.image} alt={`Image for ${album.name}`} />
+                        <h3>{album.title}</h3>
+                        <p>{album.year}</p>
+                        <img src={album.link} alt={`Image for ${album.title}`} />
                     </div>
                 ))}
             </div>

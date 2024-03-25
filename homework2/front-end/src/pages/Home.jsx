@@ -4,7 +4,8 @@ import SearchBar from "../components/SearchBar";
 import PictureList from "../components/PictureList";
 const Home = () => {
     const [results, setResults] = useState([]);
-
+    const apiUrlArtists = 'http://localhost:5000/api/artists/getAll';
+    const apiUrlAlbums = 'http://localhost:5000/api/albums/getAll';
     // Funcție pentru a seta rezultatele căutării în starea componentei
     const handleSearchResults = (searchResults) => {
         setResults(searchResults);
@@ -20,9 +21,9 @@ const Home = () => {
                 })}
             </div>
             <h2>Your Albums</h2>
-            <PictureList />
+            <PictureList apiUrl={apiUrlAlbums} string={'music'} />
             <h2>Your Artists</h2>
-            <PictureList />
+            <PictureList apiUrl={apiUrlArtists} string={'artist'} />
         </div>
     );
 };

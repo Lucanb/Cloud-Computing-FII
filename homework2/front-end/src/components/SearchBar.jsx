@@ -6,14 +6,14 @@ export default function SearchBar({ onSearchResults }) { // Adăugăm proprietat
     const [input, setInput] = useState("");
 
     const fetchData = (value) => {
-        fetch(`https://jsonplaceholder.typicode.com/users?q=${value}`)
+        fetch(`http://localhost:5000/api/artists/getAll`)
             .then((response) => response.json())
             .then((data) => {
                 console.log(data);
                 const filteredResults = data.filter(
-                    (user) =>
-                        user.name &&
-                        user.name.toLowerCase().includes(value.toLowerCase())
+                    (artist) =>
+                        artist.name &&
+                        artist.name.toLowerCase().includes(value.toLowerCase())
                 );
                 onSearchResults(filteredResults); // Apelăm funcția onSearchResults cu rezultatele căutării
             })

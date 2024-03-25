@@ -9,7 +9,8 @@
 }
 
 .image-item {
-    flex: 0 0 auto;
+    width: 200px;
+    height: auto;
 }
 
 .image-item img {

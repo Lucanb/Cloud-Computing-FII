@@ -61,16 +61,13 @@ router.delete("/deleteAll", async (req, res) => {
     try {
         const albums = await Album.find();
 
-        // Pentru fiecare album găsit
         for (const album of albums) {
-            // Găsește și șterge toate melodiile asociate acestui album
             await song.deleteMany({ album: album._id });
         }
         await Album.deleteMany({});
 
         return res.status(200).json({ success: true, message: "Toate albumele și melodiile asociate au fost șterse cu succes." });
     } catch (error) {
-        // În caz de eroare, returnează un mesaj de eroare
         return res.status(500).json({ success: false, message: "Eroare la ștergerea albumele și melodiilor asociate." });
     }
 });
@@ -86,9 +83,7 @@ router.delete("/deleteOne/:id", async (req, res) => {
 
         await song.deleteMany({ album: album._id });
 
-        // Șterge albumul
         await Album.findByIdAndDelete(albumId);
-        s
         return res.status(200).json({ success: true, message: "Albumul și melodiile asociate au fost șterse cu succes." });
     } catch (error) {
         // În caz de eroare, returnează un mesaj de eroare
