@@ -69,6 +69,22 @@ router.get("/getOne/:id", async (req, res) => {
     }
 });
 
+router.get("/getAlbumsByArtist/:nameArtist", async (req, res) => {
+    const filter = { artist: req.params.nameArtist };
+
+    try {
+        const albums = await Album.find(filter);
+
+        if (albums.length > 0) {
+            return res.status(200).json({ success: true, artist: albums });
+        } else {
+            return res.status(400).json({ success: false, message: "Nu s-au găsit albume pentru acest artist." });
+        }
+    } catch (error) {
+        return res.status(400).json({ success: false, message: error.message });
+    }
+});
+
 router.delete("/deleteAll", async (req, res) => {
     try {
         const albums = await Album.find();
