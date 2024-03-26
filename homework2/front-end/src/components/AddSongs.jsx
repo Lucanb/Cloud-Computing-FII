@@ -29,12 +29,12 @@ const AddSongModal = ({ isOpen, onClose }) => {
                 },
                 body: JSON.stringify(songData),
             });
-
+            console.log(response);
+            console.log(songData)
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                // throw new Error('Network response was not ok');
             }
 
-            // Resetăm datele formularului după submit
             setSongData({
                 title: "",
                 artist: "",
@@ -44,7 +44,6 @@ const AddSongModal = ({ isOpen, onClose }) => {
                 duration: "",
             });
 
-            // Închiderea modalei după submit
             onClose();
         } catch (error) {
             console.error('Error adding song:', error);
