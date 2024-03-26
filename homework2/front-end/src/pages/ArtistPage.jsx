@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import {useParams} from "react-router-dom";
+import {useParams, useNavigate} from "react-router-dom";
 import "./artistPage.css"
 const ArtistPage = () => {
-    let { artistId } = useParams(); // Accesează ID-ul din obiectul params
-    // artistId = artistId.replace(":", "");
-    console.log(artistId); // Afișează ID-ul în consolă
-    // let {artistId} = 7;
-    artistId = '6601dd1f0a751a7bc838733a';
-    console.log('test', artistId)
+    let { id } = useParams(); // Accesează ID-ul din obiectul params
+    id = id.replace(":", "");
+    console.log(id);
+
     const [artistData, setArtistData] = useState(null);
     const [albums, setAlbums] = useState([]);
-
+    const navigate = useNavigate();
     const fetchArtistData = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/artists/getOne/${artistId}`);
+            const response = await fetch(`http://localhost:5000/api/artists/getOne/${id}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -52,6 +50,7 @@ const ArtistPage = () => {
 
     const handleAlbumClick = (album) => {
         console.log(`Ai selectat albumul: ${album.title}`);
+        navigate(`/music/:${album._id}`); // Navigare la ruta corespunzătoare albumului
     };
 
     if (!artistData) {

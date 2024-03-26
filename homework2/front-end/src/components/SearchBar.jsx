@@ -27,7 +27,7 @@ export default function SearchBar({ onSearchResults }) { // Adăugăm proprietat
 
 
     const handleResultClick = (artist) => {
-        navigate(`/artist/${artist._id}`); // Navigare către pagina artistului
+        navigate(`/artist/:${artist._id}`); // Navigare către pagina artistului
     };
 
     const handleChange = (value) => {

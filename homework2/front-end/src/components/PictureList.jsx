@@ -15,6 +15,7 @@ const PictureList = ({ apiUrl,string }) => {
     const handleImageClick = (id) => {
         console.log(`Ai selectat artistul cu id-ul: ${id}`);
         // Navigare către pagina artistului
+        console.log("id de redirect",id)
         navigate(`/${string}/:${id}`);
     };
 
