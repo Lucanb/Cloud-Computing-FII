@@ -10,13 +10,38 @@ const AddArtistModal = ({ onClose }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        let newValue = value;
+        if (name === "year") {
+            // Verifică și validează formatul anului utilizând o expresie regulată
+            const isValidYear = /^\d{4}$/.test(value);
+            if (isValidYear) {
+                // Convertirea anului într-un obiect de tip Date
+                newValue = new Date(Number(value), 0); // '0' reprezintă luna ianuarie
+            }
+        }
+        setFormData({ ...formData, [name]: newValue });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        onClose();
+        try {
+            const response = await fetch('http://localhost:5000/api/artists/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            onClose();
+        } catch (error) {
+            console.error('Error saving artist:', error);
+        }
     };
 
     return (

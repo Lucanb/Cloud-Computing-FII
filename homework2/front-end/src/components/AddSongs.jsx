@@ -18,12 +18,37 @@ const AddSongModal = ({ isOpen, onClose }) => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Trimiterea datelor către backend pentru adăugarea melodiei
-        console.log("Submitted song data:", songData);
-        // Închiderea modalei după submit
-        onClose();
+
+        try {
+            const response = await fetch('http://localhost:5000/api/songs/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(songData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            // Resetăm datele formularului după submit
+            setSongData({
+                title: "",
+                artist: "",
+                album: "",
+                releaseDate: "",
+                link: "",
+                duration: "",
+            });
+
+            // Închiderea modalei după submit
+            onClose();
+        } catch (error) {
+            console.error('Error adding song:', error);
+        }
     };
 
     return (

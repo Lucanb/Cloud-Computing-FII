@@ -13,11 +13,28 @@ const AddAlbumModal = ({ onClose }) => {
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        onClose();
+        try {
+            const response = await fetch('http://localhost:5000/api/albums/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            onClose();
+        } catch (error) {
+            console.error('Error saving album:', error);
+        }
     };
+
 
     return (
         <div className="modal">

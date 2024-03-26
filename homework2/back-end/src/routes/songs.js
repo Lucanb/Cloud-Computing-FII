@@ -94,41 +94,28 @@ router.delete("/deleteAll", async (req, res) => {
         return res.status(500).json({ success: false, message: "Eroare la ștergerea obiectelor." });
     }
 });
+
 router.delete("/deleteOne/:id", async (req, res) => {
-    const artistId = req.params.id;
+    const songId = req.params.id;
 
     try {
-        const artist = await Artist.findById(artistId);
-        if (!artist) {
-            return res.status(404).json({ success: false, message: "Artistul nu a fost găsit." });
+        const existingSong = await song.findById(songId);
+        if (!existingSong) {
+            return res.status(404).json({ success: false, message: "Melodia nu a fost găsită." });
+        } else {
+            await song.findByIdAndDelete(songId);
+            return res.status(200).json({ success: true, message: "Melodia a fost ștearsă cu succes." });
         }
-
-        const songs = await song.find({ artist: artistId });
-        if (songs.length > 0) {
-            await song.deleteMany({ artist: artistId });
-        }
-
-        const albums = await Album.find({ artist: artistId });
-        if (albums.length > 0) {
-            for (const album of albums) {
-                await song.deleteMany({ album: album._id });
-            }
-            await Album.deleteMany({ artist: artistId });
-        }
-
-        // Șterge artistul
-        await Artist.findByIdAndDelete(artistId);
-
-        return res.status(200).json({ success: true, message: "Artistul și toate datele asociate au fost șterse cu succes." });
     } catch (error) {
-        return res.status(500).json({ success: false, message: "Eroare la ștergerea artistului și a datelor asociate." });
+        console.error("Eroare la ștergerea melodiei:", error);
+        return res.status(500).json({ success: false, message: "Eroare la ștergerea melodiei." });
     }
 });
 
 
 router.delete("/deleteAll", async (req, res) => {
     try {
-        await Song.deleteMany({});
+        await song.deleteMany({});
 
         await Album.deleteMany({});
 

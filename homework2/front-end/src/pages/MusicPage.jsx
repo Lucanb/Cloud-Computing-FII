@@ -88,12 +88,10 @@ const MusicPage = () => {
         setCurrentIndex(index);
     };
 
-    // Calculează indexul primei și ultimei piese de pe pagina curentă
     const indexOfLastSong = (pageNumber + 1) * songsPerPage;
     const indexOfFirstSong = indexOfLastSong - songsPerPage;
     const currentSongs = songs.slice(indexOfFirstSong, indexOfLastSong);
 
-    // Schimbă pagina
     const changePage = ({ selected }) => {
         setPageNumber(selected);
     };
@@ -105,7 +103,12 @@ const MusicPage = () => {
             <div className="add-song-button" onClick={openAddSongModal}>Add Song</div>
             <AddSongModal isOpen={isAddSongModalOpen} onClose={() => setIsAddSongModalOpen(false)} />
             <div className={"player-main"}>
-                <MusicPlayer currentSong={currentSong} currentIndex={currentIndex}/>
+                <MusicPlayer
+                    currentSong={currentSong}
+                    currentIndex={currentIndex}
+                    songs={songs}
+                    setSongs={setSongs}
+                />
             </div>
             <div className="pagination-container"
                  style={{maxHeight: paginationMaxHeight}}> {/* Adaugă un container pentru paginare */}
