@@ -52,7 +52,7 @@ const ArtistPage = () => {
 
     const handleAlbumClick = (album) => {
         console.log(`Ai selectat albumul: ${album.title}`);
-        navigate(`/music/:${album._id}`); // Navigare la ruta corespunzătoare albumului
+        navigate(`/music/:${album._id}`);
     };
 
     const handleDeleteAlbum = async (albumId) => {
@@ -73,7 +73,6 @@ const ArtistPage = () => {
         setIsEditModalOpen(true);
     };
     const handleUpdateArtist = (updatedData) => {
-        // Implementează logica pentru actualizarea datelor artistului aici
         console.log('Updated artist data:', updatedData);
     };
 
