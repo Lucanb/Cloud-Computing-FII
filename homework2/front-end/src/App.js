@@ -32,7 +32,7 @@ function App() {
                         <Route exact path="/signup" element={<SignUp />} />
                         {/*<Route path="/home" element={<Protected><Home /></Protected>} />*/}
                         <Route exact path="/home" element={<Home />} />
-                        <Route exact path="/music" element={<MusicPage />} />
+                        <Route exact path="/music/:id" element={<MusicPage />} />
                         <Route exact path="/artist" element={<ArtistPage />} />
                     </Routes>
                 </AuthContext>

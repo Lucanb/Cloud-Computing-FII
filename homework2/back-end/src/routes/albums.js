@@ -2,6 +2,8 @@ import express from "express";
 import Album from "../model/album.js";
 import Artist from "../model/artist.js";
 import song from "../model/song.js";
+// const { ObjectId } = require('mongodb');
+import mongoose from 'mongoose';
 
 const router = express.Router();
 
@@ -42,7 +44,17 @@ router.get("/getAll", async (req, res) => {
 });
 
 router.get("/getOne/:id", async (req, res) => {
-    const filter = { _id: req.params.id };
+    const id = req.params.id;
+
+    // Verifică dacă id-ul este un șir de caractere
+    if (typeof id === 'string') {
+        const ObjectId = mongoose.Types.ObjectId;
+
+        // Efectuează conversia în ObjectId
+        var filter = { _id: new ObjectId(id) };
+        // Efectuează conversia în ObjectId
+        // const filter = { _id: mongoose.Types.ObjectId(id) };
+        }
 
     try {
         const artist = await Album.findOne(filter);

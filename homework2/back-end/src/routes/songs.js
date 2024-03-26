@@ -67,6 +67,22 @@ router.get("/getOne/:id", async (req, res) => {
     }
 });
 
+router.get("/getSongsByAlbum/:nameAlbum", async (req, res) => {
+    const filter = { album: req.params.nameAlbum };
+
+    try {
+        const songs = await song.find(filter);
+
+        if (songs.length > 0) {
+            return res.status(200).json({ success: true, songs: songs });
+        } else {
+            return res.status(400).json({ success: false, message: "Nu s-au găsit melodii pentru acest album." });
+        }
+    } catch (error) {
+        return res.status(400).json({ success: false, message: error.message });
+    }
+});
+
 router.delete("/deleteAll", async (req, res) => {
     try {
         const deletedArtists = await song.deleteMany({});
