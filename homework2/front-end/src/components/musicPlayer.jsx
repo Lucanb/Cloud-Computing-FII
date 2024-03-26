@@ -12,7 +12,6 @@
                 const response = await fetch(`http://localhost:5000/api/songs/deleteOne/${currentSong.currentSong._id}`, {
                     method: 'DELETE'
                 });
-                console.log('verify id: ',currentSong.currentSong._id)
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
@@ -22,7 +21,6 @@
                 console.error('Error deleting song:', error);
             }
         };
-        console.log(currentSong)
         // useEffect(() => { //vedem daca facem si muzica
         //         if(isPlaying){
         //             audioRef.current.play();

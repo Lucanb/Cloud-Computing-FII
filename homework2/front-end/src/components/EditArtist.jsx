@@ -1,52 +1,55 @@
 import React, { useState } from 'react';
 
-const EditArtistModal = ({ artistData, onClose }) => {
-    const [name, setName] = useState(artistData.name);
-    const [description, setDescription] = useState(artistData.description);
-    const [members, setMembers] = useState(artistData.members);
-    const [link, setLink] = useState(artistData.link);
+const EditArtistModal = ({ artistData,onClose }) => {
+    const [formData, setFormData] = useState({
+        name: '',
+        description: '',
+        members: '',
+        link: ''
+    });
 
-    const handleUpdateArtist = async (e) => {
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch(`http://localhost:5000/api/artists/update/${artistData._id}`, {
+            const response = await fetch(`http://localhost:5000/api/artists/updateOne/${artistData._id}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    name,
-                    description,
-                    members,
-                    link
-                })
+                body: JSON.stringify(formData),
             });
+
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
+
             onClose();
-            console.log('Artist data updated successfully!');
+            console.log('Artist updated successfully!');
         } catch (error) {
-            console.error('Error updating artist data:', error);
+            console.error('Error updating artist:', error);
         }
     };
-
     return (
         <div className="modal">
-            <form onSubmit={handleUpdateArtist}>
-                <label>Name:</label>
-                <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-                <label>Description:</label>
-                <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
-                <label>Members:</label>
-                <input type="text" value={members} onChange={(e) => setMembers(e.target.value)} />
-                <label>Link:</label>
-                <input type="text" value={link} onChange={(e) => setLink(e.target.value)} />
-                <button type="submit">Update Artist</button>
-            </form>
-            <button onClick={onClose}>Close</button>
+            <div className="modal-content">
+                <span className="close" onClick={onClose}>&times;</span>
+                <h2>Edit Artist</h2>
+                <form onSubmit={handleSubmit}>
+                    <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Name" />
+                    <input type="text" name="description" value={formData.description} onChange={handleChange} placeholder="Description" />
+                    <input type="text" name="members" value={formData.members} onChange={handleChange} placeholder="Members" />
+                    <input type="text" name="link" value={formData.link} onChange={handleChange} placeholder="Link" />
+                    <button type="submit">Update</button>
+                </form>
+            </div>
         </div>
     );
 };
+
 
 export default EditArtistModal;

@@ -11,7 +11,6 @@ const PictureList = ({ apiUrl,string }) => {
             .then(data => setImageList(data))
             .catch(error => console.error('Error fetching data:', error));
     }, [apiUrl]);
-    console.log('imageList:', imageList);
     const handleImageClick = (id) => {
         console.log(`Ai selectat artistul cu id-ul: ${id}`);
         // Navigare către pagina artistului
@@ -27,7 +26,6 @@ const PictureList = ({ apiUrl,string }) => {
             }else{
                 apiString = "artists";
             }
-            console.log('apiString : ',apiString)
             const response = await fetch(`http://localhost:5000/api/${apiString}/deleteOne/${id}`, {
                 method: 'DELETE'
             });

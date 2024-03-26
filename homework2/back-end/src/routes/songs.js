@@ -33,9 +33,6 @@ router.post("/save", async (req, res) => {
             return res.status(400).json({ success: false, msg: "Albumul nu a fost găsit." });
         }
 
-        // newSong.artist = artist._id;
-        // newSong.album = album._id;
-
         const savedSong = await newSong.save();
         return res.status(200).json({ success: true, song: savedSong });
     } catch (error) {

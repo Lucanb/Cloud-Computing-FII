@@ -5,7 +5,6 @@ import "./artistPage.css"
 const ArtistPage = () => {
     let { id } = useParams(); // Accesează ID-ul din obiectul params
     id = id.replace(":", "");
-    console.log(id);
 
     const [artistData, setArtistData] = useState(null);
     const [albums, setAlbums] = useState([]);
@@ -18,7 +17,6 @@ const ArtistPage = () => {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
-            console.log(data)
             setArtistData(data.artist);
         } catch (error) {
             console.error('Error fetching artist data:', error);
@@ -27,13 +25,11 @@ const ArtistPage = () => {
 
     const fetchAlbumsByArtist = async () => {
         try {
-            console.log('artist name : ',artistData.name)
             const response = await fetch(`http://localhost:5000/api/albums/getAlbumsByArtist/${encodeURIComponent(artistData.name)}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
-            console.log('data in after artist',data.artist)
             setAlbums(data.artist);
         } catch (error) {
             console.error('Error fetching albums by artist:', error);
@@ -51,7 +47,6 @@ const ArtistPage = () => {
     }, [artistData]);
 
     const handleAlbumClick = (album) => {
-        console.log(`Ai selectat albumul: ${album.title}`);
         navigate(`/music/:${album._id}`);
     };
 
@@ -72,9 +67,7 @@ const ArtistPage = () => {
     const handleEditArtistData = () => {
         setIsEditModalOpen(true);
     };
-    const handleUpdateArtist = (updatedData) => {
-        console.log('Updated artist data:', updatedData);
-    };
+
 
     if (!artistData) {
         return <div>Loading...</div>;
@@ -91,7 +84,6 @@ const ArtistPage = () => {
                 <EditArtistModal
                     artistData={artistData}
                     onClose={() => setIsEditModalOpen(false)}
-                    onUpdateArtist={handleUpdateArtist}
                 />
             )}
             <h1>{name}</h1>

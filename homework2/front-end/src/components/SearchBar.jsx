@@ -11,7 +11,6 @@ export default function SearchBar({ onSearchResults }) { // Adăugăm proprietat
         fetch(`http://localhost:5000/api/artists/getAll`)
             .then((response) => response.json())
             .then((data) => {
-                console.log('data : ',data);
                 const filteredResults = data.filter(
                     (artist) =>
                         artist.name &&
