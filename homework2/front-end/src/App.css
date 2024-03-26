@@ -36,3 +36,39 @@
     transform: rotate(360deg);
   }
 }
+
+.add-buttons {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.add-buttons button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.add-buttons button:hover {
+  background-color: #0056b3;
+}
+
+.add-song-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.add-song-button:hover {
+  background-color: #0056b3;
+}

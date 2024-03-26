@@ -16,3 +16,20 @@
 .image-item img {
     max-width: 100%;
 }
+.unfollow-button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.unfollow-button:hover {
+    background-color: #d32f2f;
+}

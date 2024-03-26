@@ -4,7 +4,7 @@ import MusicPlayer from "../components/musicPlayer";
 import Player from "../components/musicContainer";
 import ReactPaginate from 'react-paginate';
 import { useParams } from 'react-router-dom';
-
+import AddSongModal from "../components/AddSongs";
 const MusicPage = () => {
     let { id } = useParams(); // Accesează ID-ul din obiectul params
     id = id.replace(":", "");
@@ -16,6 +16,7 @@ const MusicPage = () => {
     const [currentSong, setCurrentSong] = useState({});
     const [pageNumber, setPageNumber] = useState(0);
     const [currentIndex, setCurrentIndex] = useState(null);
+    const [isAddSongModalOpen, setIsAddSongModalOpen] = useState(false);
     const songsPerPage = 6;
 
     // Calculează înălțimea ecranului pentru a seta înălțimea maximă a containerului de paginare
@@ -96,13 +97,18 @@ const MusicPage = () => {
     const changePage = ({ selected }) => {
         setPageNumber(selected);
     };
-
+    const openAddSongModal = () => {
+        setIsAddSongModalOpen(true);
+    };
     return (
         <div>
+            <div className="add-song-button" onClick={openAddSongModal}>Add Song</div>
+            <AddSongModal isOpen={isAddSongModalOpen} onClose={() => setIsAddSongModalOpen(false)} />
             <div className={"player-main"}>
                 <MusicPlayer currentSong={currentSong} currentIndex={currentIndex}/>
             </div>
-            <div className="pagination-container" style={{ maxHeight: paginationMaxHeight }}> {/* Adaugă un container pentru paginare */}
+            <div className="pagination-container"
+                 style={{maxHeight: paginationMaxHeight}}> {/* Adaugă un container pentru paginare */}
                 <div className="music-play-container">
                     {currentSongs.map((song, index) => (
                         <Player key={index} song={song} getSongsData={getSongsData} index={index}/>

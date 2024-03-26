@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {useParams, useNavigate} from "react-router-dom";
+import EditArtistModal from '../components/EditArtist';
 import "./artistPage.css"
 const ArtistPage = () => {
     let { id } = useParams(); // Accesează ID-ul din obiectul params
@@ -8,6 +9,7 @@ const ArtistPage = () => {
 
     const [artistData, setArtistData] = useState(null);
     const [albums, setAlbums] = useState([]);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const navigate = useNavigate();
     const fetchArtistData = async () => {
         try {
@@ -53,6 +55,28 @@ const ArtistPage = () => {
         navigate(`/music/:${album._id}`); // Navigare la ruta corespunzătoare albumului
     };
 
+    const handleDeleteAlbum = async (albumId) => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/albums/deleteOne/${albumId}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            setAlbums(albums.filter(album => album._id !== albumId));
+            console.log('Album deleted successfully!');
+        } catch (error) {
+            console.error('Error deleting album:', error);
+        }
+    };
+    const handleEditArtistData = () => {
+        setIsEditModalOpen(true);
+    };
+    const handleUpdateArtist = (updatedData) => {
+        // Implementează logica pentru actualizarea datelor artistului aici
+        console.log('Updated artist data:', updatedData);
+    };
+
     if (!artistData) {
         return <div>Loading...</div>;
     }
@@ -61,6 +85,16 @@ const ArtistPage = () => {
 
     return (
         <div>
+            <div className="artist-header">
+                <button className="edit-artist-button" onClick={handleEditArtistData}>Edit</button>
+            </div>
+            {isEditModalOpen && (
+                <EditArtistModal
+                    artistData={artistData}
+                    onClose={() => setIsEditModalOpen(false)}
+                    onUpdateArtist={handleUpdateArtist}
+                />
+            )}
             <h1>{name}</h1>
             <h2>Albums</h2>
             <div className="album-list">
@@ -68,7 +102,8 @@ const ArtistPage = () => {
                     <div className="album-item" key={index} onClick={() => handleAlbumClick(album)}>
                         <h3>{album.title}</h3>
                         <p>{new Date(album.year).getFullYear()}</p> {/* Afișează doar anul */}
-                        <img src={album.link} alt={`Image for ${album.title}`} />
+                        <img src={album.link} alt={`Image for ${album.title}`}/>
+                        <button className="delete-album-button" onClick={() => handleDeleteAlbum(album._id)}>Delete</button>
                     </div>
                 ))}
             </div>

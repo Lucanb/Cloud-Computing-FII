@@ -18,13 +18,40 @@ const PictureList = ({ apiUrl,string }) => {
         console.log("id de redirect",id)
         navigate(`/${string}/:${id}`);
     };
+    const handleUnfollow = async (id) => {
+        try {
+            let apiString;
+            if (string === "music")
+            {
+                apiString = "albums";
+            }else{
+                apiString = "artists";
+            }
+            console.log('apiString : ',apiString)
+            const response = await fetch(`http://localhost:5000/api/${apiString}/deleteOne/${id}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            // Actualizează lista de imagini după ștergere
+            const updatedImageList = imageList.filter(image => image._id !== id);
+            setImageList(updatedImageList);
+            console.log('Unfollow successful!');
+        } catch (error) {
+            console.error('Error unfollowing:', error);
+        }
+    };
 
     return (
         <div className="image-list-container">
             <div className="image-list">
-                {imageList.map((imageName, index) => (
+                {imageList.slice(0, 6).map((imageName, index) => (
+                    <div key={index}>
                     <div className="image-item" key={index} onClick={() => handleImageClick(imageName._id)}>
                         <img src={imageName.link} alt={`Image ${index + 1}`}/>
+                    </div>
+                    <button className="unfollow-button" onClick={() => handleUnfollow(imageName._id)}>Unfollow</button>
                     </div>
                 ))}
             </div>

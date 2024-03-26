@@ -13,3 +13,37 @@
     max-height: 200px;
     object-fit: cover;
 }
+.artist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.edit-artist-button {
+    display: flex;
+    align-items: center;
+    background-color: #0056b3;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 16px;
+    margin-left: auto; /* Plasare la dreapta sus */
+    cursor: pointer;
+}
+
+.delete-album-button {
+    background-color: #f44336;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 16px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.edit-artist-button:hover{
+    background-color: #0056b3;
+}
+.delete-album-button:hover {
+    background-color: #d32f2f;
+}
