@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/static/css/main.4769d6cb.css",
+    "main.js": "/static/js/main.84cb06ab.js",
+    "static/js/453.9537af23.chunk.js": "/static/js/453.9537af23.chunk.js",
+    "static/media/HIM - Join Me In Death.mp3": "/static/media/HIM - Join Me In Death.19c02eb9c59dff4ca211.mp3",
+    "index.html": "/index.html",
+    "main.4769d6cb.css.map": "/static/css/main.4769d6cb.css.map",
+    "main.84cb06ab.js.map": "/static/js/main.84cb06ab.js.map",
+    "453.9537af23.chunk.js.map": "/static/js/453.9537af23.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.4769d6cb.css",
+    "static/js/main.84cb06ab.js"
+  ]
+}
