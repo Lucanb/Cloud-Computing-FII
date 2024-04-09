@@ -1,0 +1,65 @@
+import React, { useState, useEffect, useContext } from 'react';
+import './PictureList.css';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../middleware';
+
+const PictureList = ({ apiUrl, string }) => {
+    const [imageList, setImageList] = useState([]);
+    const navigate = useNavigate();
+    const user = useContext(AuthContext);
+
+    useEffect(() => {
+        console.log('User in Picture List:', user);
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => setImageList(data))
+            .catch(error => console.error('Error fetching data:', error));
+    }, [apiUrl, user]);
+
+    const handleImageClick = (id) => {
+        console.log(`Ai selectat artistul cu id-ul: ${id}`);
+        // Navigare către pagina artistului
+        console.log("id de redirect", id)
+        navigate(`/${string}/:${id}`);
+    };
+
+    const handleUnfollow = async (id) => {
+        try {
+            let apiString;
+            if (string === "music") {
+                apiString = "albums";
+            } else {
+                apiString = "artists";
+            }
+            const response = await fetch(`https://us-central1-homework3-project.cloudfunctions.net/gcp-func-novus/api/${apiString}/deleteOne/${id}/${user.uid}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            // Actualizează lista de imagini după ștergere
+            const updatedImageList = imageList.filter(image => image._id !== id);
+            setImageList(updatedImageList);
+            console.log('Unfollow successful!');
+        } catch (error) {
+            console.error('Error unfollowing:', error);
+        }
+    };
+
+    return (
+        <div className="image-list-container">
+            <div className="image-list">
+                {imageList.slice(0, 6).map((imageName, index) => (
+                    <div key={index}>
+                        <div className="image-item" key={index} onClick={() => handleImageClick(imageName._id)}>
+                            <img src={imageName.link} alt={`Image ${index + 1}`} />
+                        </div>
+                        <button className="unfollow-button" onClick={() => handleUnfollow(imageName._id)}>Unfollow</button>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+export default PictureList;

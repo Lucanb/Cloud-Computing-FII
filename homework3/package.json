@@ -1,0 +1,16 @@
+{
+  "name": "homework3",
+  "version": "1.0.0",
+  "description": "Tema numarul 3 5 servicii Google Cloud",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Luca Nastasa Baras, Cantea Carmina",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/pubsub": "^4.3.3",
+    "@google-cloud/storage": "^7.9.0",
+    "google-auth-library": "^9.7.0"
+  }
+}
