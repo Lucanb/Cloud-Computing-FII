@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "homework3-project",
+  "private_key_id": "4269da6361312f8fa50fa8ad255ac9c281ebfd8f",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDfW9YKPJXU0sPw\nDI0kpMcstv4ryc0/8ExPN26EOyeodtyjvvSF+clHdXGz1Yd94XwzvyD11o99pJa1\nRPoA4XAq87OVfurGm0ZuBT9ZKudFrMOdAu4HpsT6FdWJlCX1e4FQHonPY2BnCu/0\nRhhDu6AFISTTOncMgEf/C/c8YkIVs5KxOAIsASb1cmOAcaF8bW5ArjVuDTAkoPrK\nFMoVXYrI0puUgl2lMeRx+IECKMadL/bS/J2J3G9DWiuuHClnpZQuSnbfi8uhG8cR\nIIN5e6OvxJdR8/PGBQhjTubzjpEgWV7EFf7QsMCo79GJ1GRBwWCYfqQrElFmELDq\nRu4eRqB1AgMBAAECggEAGszCnFzTn4MghnODFfP9gAR+79MZYQQcq96bUJtmcUS9\nyZn2bgLgH0Zcu7axuK1vASh8NHMnqWwvtxVNKADkvAqcsCHX2rez1iykArduo4IM\nwJCi7eEZPmaTRhw0B8XnaK0ZXPxwCz0ZOIaWj735/9OPvxaDRUk5GkWdxy2E/2Rg\nodCVSF4epaKWk5KXajM2D+IEjb8TlnsD8IPe4Zts+c4/vngqX1jj/zQsmV0Me1aG\nRCxLZTFEAxl2Xj3LsGzD9zLzEui6iHYA9Zf/6JD41Eg/yg7SxtkkOM254TR7MxaS\nR/j3ZAkMxqgqt1ttFz8duxK/JvEbEb5yMqsqkis4GwKBgQDvphlH9kGBrb6Vr3gk\nUZA/csh/T2+vgg1DbzkMUB6TiPiW/shKOLWYS+ZXknUqyj1WUek8kqDFhwKs71GY\nR0Rmys5r6pX63QIxlWmzqEqRPRq5/ne+ZPiEDpDUKh5hW/ASp+ZhnxKPh3qR3T6+\nVP3JtwxjH8t6Xncp7W5sBpTbUwKBgQDumTOPSYNR4YTzIswbZNMuBRevphMIfLpY\njWgsNzZzKhCQIHcIc8DMnAvik/8DIFDOe32OZbiasxB1yS/6vtxzwiicSgSQpE7t\nvOyPkRgGJmIs0QxJxP8zDt0kQU/g3eS4KQmPppNO6YeQuGGcIuWkpTxVuhdbgLjM\neT6gfQvkFwKBgAW3JWU090z7cs8pFylulI0e1K9MmrJJ3L0d+vNTOdd07dDUFLzI\na3RNYxn1kTvLBPl5DKH4MUNku+iZ8I08LeJxtciXGKqZ+MJr+NBjFBwwo+GJsxtk\nVxT3L/cPZhgWVDxtqq3rWEr6BS9TYnqxljfoWLBIgtbRR/BFDFwhMA2nAoGBANrP\nuM8hNcMztL9dHB3LOzgrB2vYPAA+ko5/MBfMkqzO2N20SDWCIkACo4uo+eceDb0u\n1xhuBPwqV2ANn2iu/HFUj/W0k7cqWBACgFexUnzhWouLM1+7v+ZNLVUAaIbqN8UE\nLXaF5vYpiF+aGDoebsetmUVtIdqSk+dBEcQQqYUFAoGAVDFVY7HLuDoChIdYwdbk\nou8dIuIdSc7ReOEbZpZE0NWjWUYIDg8IXjpkJHBBcYIS4QGE9Ok7gBvinV+XKdhu\n5JeAHa2MbuWWIVaMqq2ZgaE83dLnKax8zjnqF6OCQ+IN07qBORT20Q08bEGcgeTc\nP9ejvyjcUKBnAOrAjHq7PR8=\n-----END PRIVATE KEY-----\n",
+  "client_email": "music-notify@homework3-project.iam.gserviceaccount.com",
+  "client_id": "107019350458880356569",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/music-notify%40homework3-project.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
