@@ -39,7 +39,7 @@ const MusicPage = () => {
             }
             const data = await response.json();
 
-            // console.log('data : ',data)
+            console.log('data : ',data)
             const fetchedAlbum = data.album; // Salvează datele albumului din răspunsul API
             // console.log(fetchedAlbum)
             if (fetchedAlbum && fetchedAlbum._id) {
