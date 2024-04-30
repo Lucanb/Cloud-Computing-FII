@@ -1,0 +1,40 @@
+.addForm {
+    height: auto;
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    input{
+        border: 2px solid rgb(134, 134, 134);
+    }
+}
+
+
+.addForm button {
+    margin-left: 15px;
+    width: 100%;
+    height: auto;
+    align-self: center;
+    background-color: #1e2853;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.addForm button:hover {
+    background-color: #2f73d3;
+}
+
+.modal-content{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+}
