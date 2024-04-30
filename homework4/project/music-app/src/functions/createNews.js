@@ -1,8 +1,13 @@
 const { Pool } = require('pg');
 const { app } = require('@azure/functions');
 
+const encodedUsername = encodeURIComponent("luca@music-luca");
+const encodedPassword = encodeURIComponent("UFDHGEQS0727156236321#a");
+const connectionString = `postgres://${encodedUsername}:${encodedPassword}@music-luca.postgres.database.azure.com:5432/music`;
+
 const pool = new Pool({
-    connectionString: "postgres://luca%40music-luca:'UFDHGEQS0727156236321%23a'@music-luca.postgres.database.azure.com:5432/music",
+    
+    connectionString: connectionString,
     ssl: {
         rejectUnauthorized: false
     }
@@ -23,13 +28,36 @@ app.http('news-post', {
     methods: ['POST'],
     authLevel: 'anonymous',
     route: 'news/create',
-    handler: async (context, req) => {
-        console.log(req.body)
-        const { topicName, title, content } = req.body;
+    handler: async (request,context) => {
+        console.log(request.body)
+        const { topicName, title, content } = JSON.parse(await request.text());
+        console.log('topic : ',topicName)
+        console.log('title : ',title)
+        console.log('content : ',content)
 
         try {
             const client = await connectToDatabase();
 
+            // Verifică dacă există deja un topic cu același nume
+            const topicExistsQuery = 'SELECT EXISTS (SELECT 1 FROM topics WHERE name = $1)';
+            const topicExistsResult = await client.query(topicExistsQuery, [topicName]);
+            const topicExists = topicExistsResult.rows[0].exists;
+
+            // Verifică dacă există deja un titlu cu același nume
+            const titleExistsQuery = 'SELECT EXISTS (SELECT 1 FROM news WHERE title = $1)';
+            const titleExistsResult = await client.query(titleExistsQuery, [title]);
+            const titleExists = titleExistsResult.rows[0].exists;
+
+            // Verifică dacă atât topicul, cât și titlul sunt diferite de orice înregistrare existentă
+            if (topicExists || titleExists) {
+                context.res = {
+                    status: 400,
+                    body: { message: "Topicul sau titlul există deja în baza de date" }
+                };
+                return;
+            }
+
+            // Dacă nu există deja un topic sau titlu cu același nume, se face inserția
             const result = await client.query(
                 'INSERT INTO news (topic_name, title, content) VALUES ($1, $2, $3) RETURNING id',
                 [topicName, title, content]

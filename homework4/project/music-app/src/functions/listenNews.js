@@ -1,19 +1,59 @@
-module.exports = async function (context, mySbMsg) {
-    const topicName = context.bindingData.userProperties.topicName;
-    const subscriptionName = context.bindingData.subscriptionName;
+const { Pool } = require('pg');
+const { app } = require('@azure/functions');
 
-    console.log(`Received message from topic: ${topicName} with subscription: ${subscriptionName}`);
-    console.log(`Message Body: ${mySbMsg}`);
+const encodedUsername = encodeURIComponent("luca@music-luca");
+const encodedPassword = encodeURIComponent("UFDHGEQS0727156236321#a");
+const connectionString = `postgres://${encodedUsername}:${encodedPassword}@music-luca.postgres.database.azure.com:5432/music`;
 
-    const signalRMessage = {
-        target: 'newMessage',
-        arguments: [{ topicName, subscriptionName, message: mySbMsg }]
-    };
+const pool = new Pool({
+    connectionString: connectionString,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
 
-    context.bindings.signalRMessages = [signalRMessage];
+async function getLatestNews() {
+    let client;
+    try {
+        client = await pool.connect();
+        console.log("Connected to PostgreSQL database");
 
-    context.res = {
-        status: 200,
-        body: { message: "Message sent to client successfully" }
-    };
-};
+        const result = await client.query(
+            'SELECT * FROM news ORDER BY id DESC LIMIT 5'
+        );
+
+        return result.rows.map(row => ({
+            topic_name: row.topic_name,
+            title: row.title,
+            content: row.content
+        }));
+    } catch (error) {
+        console.error("Error fetching news:", error);
+        throw error;
+    } finally {
+        if (client) {
+            client.release();
+        }
+    }
+}
+
+app.http('get-latest-news', {
+    methods: ['GET'],
+    route: 'news/latest',
+    handler: async (context) => {
+        try {
+            const latestNews = await getLatestNews();
+            context.res = {
+                status: 200,
+                body: latestNews
+            };
+            console.log(latestNews)
+        } catch (error) {
+            console.error("Error getting latest news:", error);
+            context.res = {
+                status: 500,
+                body: { message: "Internal Server Error", error: error.message }
+            };
+        }
+    }
+});
