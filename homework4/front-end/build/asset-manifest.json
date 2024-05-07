@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/static/css/main.a3845c21.css",
-    "main.js": "/static/js/main.301c8ab2.js",
+    "main.css": "/static/css/main.5e8fff65.css",
+    "main.js": "/static/js/main.1826c6c5.js",
     "static/js/453.9537af23.chunk.js": "/static/js/453.9537af23.chunk.js",
     "static/media/HIM - Join Me In Death.mp3": "/static/media/HIM - Join Me In Death.19c02eb9c59dff4ca211.mp3",
     "index.html": "/index.html",
-    "main.a3845c21.css.map": "/static/css/main.a3845c21.css.map",
-    "main.301c8ab2.js.map": "/static/js/main.301c8ab2.js.map",
+    "main.5e8fff65.css.map": "/static/css/main.5e8fff65.css.map",
+    "main.1826c6c5.js.map": "/static/js/main.1826c6c5.js.map",
     "453.9537af23.chunk.js.map": "/static/js/453.9537af23.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.a3845c21.css",
-    "static/js/main.301c8ab2.js"
+    "static/css/main.5e8fff65.css",
+    "static/js/main.1826c6c5.js"
   ]
 }

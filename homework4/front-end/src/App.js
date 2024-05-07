@@ -12,6 +12,7 @@ import { AuthProvider, AuthContext } from "../src/middleware";
 import MusicPage from "./pages/MusicPage";
 import ArtistPage from "./pages/ArtistPage";
 import NewsComponent from "./components/NewsComponent";
+import GalleryComponent from './components/GalleryComponent';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -50,6 +51,7 @@ function App() {
                         <Route exact path="/music/:id" element={<Protected><MusicPage /></Protected>} />
                         <Route exact path="/artist/:id" element={<Protected><ArtistPage /></Protected>} />
                         <Route exact path="/news" element={<Protected><NewsComponent /></Protected>} />
+                        <Route exact path="/gallery" element={<Protected><GalleryComponent /></Protected>} />
                     </Routes>
                 </AuthProvider>
             </Router>

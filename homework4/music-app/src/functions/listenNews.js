@@ -40,14 +40,15 @@ async function getLatestNews() {
 app.http('get-latest-news', {
     methods: ['GET'],
     route: 'news/latest',
-    handler: async (context) => {
+    handler: async (request, context) => {
         try {
             const latestNews = await getLatestNews();
-            context.res = {
-                status: 200,
-                body: latestNews
-            };
+            // context.res = {
+            //     status: 200,
+            //     body: JSON.stringify(latestNews)
+            // };
             console.log(latestNews)
+            return {status: 200, body: JSON.stringify(latestNews) };
         } catch (error) {
             console.error("Error getting latest news:", error);
             context.res = {

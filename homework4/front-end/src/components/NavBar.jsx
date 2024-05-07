@@ -16,6 +16,8 @@ const NavBar = ({ onLogout }) => {
         {isAuthenticated ? (
           <>
             <Button color="inherit" onClick={onLogout}>LogOut</Button>
+            <Button color="inherit" component={Link} to="/news">News</Button>
+            <Button color="inherit" component={Link} to="/gallery">Gallery</Button>
           </>
         ) : (
           <>

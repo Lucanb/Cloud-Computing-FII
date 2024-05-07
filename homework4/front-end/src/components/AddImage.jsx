@@ -30,11 +30,10 @@ const AddImageForm = ({ isOpen, onClose }) => {
             }
 
             const blobServiceClient = new BlobServiceClient(
-                'https://mymusicapp.blob.core.windows.net/images',
-                "https://mymusicapp.blob.core.windows.net/images/?sv=2022-11-02&ss=bf&srt=co&se=2024-05-03T14%3A13%3A41Z&sp=rwl&sig=R%2BfhrbTaDq4JT56ZquylVCdGlkISiPURHjVlE9trPBA%3D"
+                'https://musicappluca.blob.core.windows.net/images?sp=racwdl&st=2024-05-07T08:56:36Z&se=2024-05-07T16:56:36Z&sv=2022-11-02&sr=c&sig=WbfuWtoe2WvhXC%2FvlVv78oSetuzI3VRUAzTjnepYuj0%3D'
             );
 
-            const containerName = '<container-name>';
+            const containerName = 'images';
             const containerClient = blobServiceClient.getContainerClient(containerName);
             const blobName = file.name;
             const blockBlobClient = containerClient.getBlockBlobClient(blobName);

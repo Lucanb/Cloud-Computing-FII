@@ -9,10 +9,10 @@ function NewsComponent() {
     const [subscriptionName, setSubscriptionName] = useState('');
 
     const listenForNews = async (e) => {
-        e.preventDefault(); // Evităm trimiterea formularului implicită
+        e.preventDefault();
         try {
             const response = await fetch(`https://music-app-luca.azurewebsites.net/api/news/latest`);
-            const data = await response //.json();
+            const data = await response .json();
             console.log(data)
             // console.log('News received:', data);
             // data = JSON("sper")
@@ -23,7 +23,7 @@ function NewsComponent() {
     };
 
     const createNews = async (e) => {
-        e.preventDefault(); // Evităm trimiterea formularului implicită
+        e.preventDefault();
         try {
             const response = await fetch('https://music-app-luca.azurewebsites.net/api/news/create', {
                 method: 'POST',
