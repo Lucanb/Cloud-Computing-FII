@@ -1,0 +1,11 @@
+{
+    "bindings": [
+      {
+        "type": "signalR",
+        "direction": "out",
+        "name": "signalRMessages",
+        "hubName": "NameOfYourSignalRHub",
+        "connectionStringSetting": "postgres://luca%40music-luca:'UFDHGEQS0727156236321%23a'@music-luca.postgres.database.azure.com:5432/music"
+      }
+    ]
+}

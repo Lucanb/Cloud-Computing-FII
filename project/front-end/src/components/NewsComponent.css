@@ -1,0 +1,42 @@
+.listenNewsForm {
+    height: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+}
+
+.listenNewsForm input, textarea {
+    border: 2px solid rgb(134, 134, 134);
+}
+
+.listenNewsForm button {
+    margin-left: 15px;
+    width: 100%;
+    height: auto;
+    align-self: center;
+    background-color: #1e2853;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.listenNewsForm button:hover {
+    background-color: #2f2fd3;
+}
+form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+}
+textarea{
+    margin-left: 15px;
+}
