@@ -16,6 +16,7 @@ async function connectToDatabase() {
     }
 }
 
+// Create Party
 async function createParty(admin) {
     const db = await connectToDatabase();
     try {
@@ -34,18 +35,19 @@ app.http('create-party', {
     handler: async (request, context) => {
         const { admin } = JSON.parse(await request.text());
         if (!admin) {
-            return { status: 400, body: { message: "Admin is required" } };
+            return { status: 400, body: JSON.stringify({ message: "Admin is required" }) };
         }
         try {
             const newParty = await createParty(admin);
             return { status: 201, body: JSON.stringify(newParty) };
         } catch (error) {
             console.error("Error creating party:", error);
-            return { status: 500, body: { message: "Internal Server Error", error: error.message } };
+            return { status: 500, body: JSON.stringify({ message: "Internal Server Error", error: error.message }) };
         }
     }
 });
 
+// Add User to Party
 async function addUserToParty(username, id_party, role, accepted) {
     const db = await connectToDatabase();
     try {
@@ -76,10 +78,15 @@ app.http('add-user-to-party', {
     }
 });
 
+// Get Party by Admin ID
 async function getPartyByAdmin(admin) {
     const db = await connectToDatabase();
     try {
+        console.log(`Searching for party with admin ID: ${admin}`);
         const party = await db.collection("party").findOne({ admin });
+        if (!party) {
+            console.log(`Party not found for admin ID: ${admin}`);
+        }
         return party;
     } catch (error) {
         console.error("Error getting party:", error);
@@ -95,12 +102,12 @@ app.http('get-party', {
         try {
             const party = await getPartyByAdmin(admin);
             if (!party) {
-                return { status: 404, body: { message: "Party not found" } };
+                return { status: 404, body: JSON.stringify({ message: "Party not found" }) };
             }
             return { status: 200, body: JSON.stringify(party) };
         } catch (error) {
             console.error("Error getting party:", error);
-            return { status: 500, body: { message: "Internal Server Error", error: error.message } };
+            return { status: 500, body: JSON.stringify({ message: "Internal Server Error", error: error.message }) };
         }
     }
 });
@@ -109,7 +116,11 @@ app.http('get-party', {
 async function deletePartyByAdmin(admin) {
     const db = await connectToDatabase();
     try {
+        console.log(`Attempting to delete party with admin ID: ${admin}`);
         const result = await db.collection("party").deleteOne({ admin });
+        if (result.deletedCount === 0) {
+            console.log(`No party found to delete for admin ID: ${admin}`);
+        }
         return result.deletedCount > 0;
     } catch (error) {
         console.error("Error deleting party:", error);
@@ -125,12 +136,12 @@ app.http('delete-party', {
         try {
             const success = await deletePartyByAdmin(admin);
             if (!success) {
-                return { status: 404, body: { message: "Party not found" } };
+                return { status: 404, body: JSON.stringify({ message: "Party not found" }) };
             }
             return { status: 204 };
         } catch (error) {
             console.error("Error deleting party:", error);
-            return { status: 500, body: { message: "Internal Server Error", error: error.message } };
+            return { status: 500, body: JSON.stringify({ message: "Internal Server Error", error: error.message }) };
         }
     }
 });
@@ -141,6 +152,7 @@ async function getUsersByAdmin(admin) {
     try {
         const party = await db.collection("party").findOne({ admin });
         if (!party) {
+            console.log(`Party not found for admin ID: ${admin}`);
             throw new Error("Party not found");
         }
         const users = await db.collection("invites").find({ id_party: party._id }).toArray();
@@ -161,7 +173,7 @@ app.http('get-users-by-party', {
             return { status: 200, body: JSON.stringify(users) };
         } catch (error) {
             console.error("Error getting users for party:", error);
-            return { status: 500, body: { message: "Internal Server Error", error: error.message } };
+            return { status: 500, body: JSON.stringify({ message: "Internal Server Error", error: error.message }) };
         }
     }
 });
@@ -172,9 +184,13 @@ async function deleteUserFromPartyByAdmin(admin, username) {
     try {
         const party = await db.collection("party").findOne({ admin });
         if (!party) {
+            console.log(`Party not found for admin ID: ${admin}`);
             throw new Error("Party not found");
         }
         const result = await db.collection("invites").deleteOne({ username, id_party: party._id });
+        if (result.deletedCount === 0) {
+            console.log(`No user found to delete for username: ${username} in party ID: ${party._id}`);
+        }
         return result.deletedCount > 0;
     } catch (error) {
         console.error("Error deleting user from party:", error);
@@ -190,12 +206,12 @@ app.http('delete-user-from-party', {
         try {
             const success = await deleteUserFromPartyByAdmin(admin, username);
             if (!success) {
-                return { status: 404, body: { message: "User not found in party" } };
+                return { status: 404, body: JSON.stringify({ message: "User not found in party" }) };
             }
             return { status: 204 };
         } catch (error) {
             console.error("Error deleting user from party:", error);
-            return { status: 500, body: { message: "Internal Server Error", error: error.message } };
+            return { status: 500, body: JSON.stringify({ message: "Internal Server Error", error: error.message }) };
         }
     }
 });
