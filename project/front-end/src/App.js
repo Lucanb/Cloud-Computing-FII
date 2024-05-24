@@ -13,6 +13,7 @@ import MusicPage from "./pages/MusicPage";
 import ArtistPage from "./pages/ArtistPage";
 import NewsComponent from "./components/NewsComponent";
 import GalleryComponent from './components/GalleryComponent';
+import PartyPage from './pages/PartyPage';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -47,6 +48,7 @@ function App() {
                         <Route exact path="/login" element={<SigIn onLogin={handleLogin} />} />
                         <Route exact path="/signup" element={<SignUp />} />
                         <Route path="/home" element={<Protected><Home /></Protected>} />
+                        <Route exact path="/party" element={<Protected>< PartyPage/></Protected>} />
                         {/*<Route exact path="/home" element={<Home />} />*/}
                         <Route exact path="/music/:id" element={<Protected><MusicPage /></Protected>} />
                         <Route exact path="/artist/:id" element={<Protected><ArtistPage /></Protected>} />

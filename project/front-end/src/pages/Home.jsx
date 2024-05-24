@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 // import { SearchResult } from "../components/SerchResults"; // Am corectat importul
+import Button from "@mui/material/Button";
 import SearchBar from "../components/SearchBar";
 import PictureList from "../components/PictureList";
 import AddArtistModal from "../components/ArtistAdd";
@@ -39,14 +40,14 @@ const Home = () => {
             <h1>Welcome to Music Controller</h1> 
             {isAuthenticated ? (
                         <>
-            <div className="add-buttons">
-                <button onClick={openAddImageForm}>Add Image</button>
-                <button onClick={openAddArtistModal}>Add Artist</button>
-                <button onClick={openAddAlbumModal}>Add Album</button>
-            </div>
-            {isAddArtistModalOpen && <AddArtistModal onClose={() => setIsAddArtistModalOpen(false)} />}
-            {isAddAlbumModalOpen && <AddAlbumModal onClose={() => setIsAddAlbumModalOpen(false)} />}
-            {isAddImageModalOpen && <AddImageForm isOpen={isAddImageModalOpen} onClose={() => setIsAddImageModalOpen(false)} />}
+                    <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
+                        <Button color="inherit" onClick={openAddImageForm}>Add Image</Button>
+                        <Button color="inherit" onClick={openAddArtistModal}>Add Artist</Button>
+                        <Button color="inherit" onClick={openAddAlbumModal}>Add Album</Button>
+                    </div>
+                    {isAddArtistModalOpen && <AddArtistModal onClose={() => setIsAddArtistModalOpen(false)} />}
+                    {isAddAlbumModalOpen && <AddAlbumModal onClose={() => setIsAddAlbumModalOpen(false)} />}
+                    {isAddImageModalOpen && <AddImageForm isOpen={isAddImageModalOpen} onClose={() => setIsAddImageModalOpen(false)} />}
             </>):(<></>)}
             <SearchBar onSearchResults={handleSearchResults}/>
             {/*<div className="results-list">*/}

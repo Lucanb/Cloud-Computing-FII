@@ -1,0 +1,81 @@
+.App {
+    text-align: center;
+    background-color: #fff;
+  }
+  
+  .party-header {
+    background-color: #fff;
+    min-height: 10vh;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    font-size: calc(10px + 2vmin);
+    color: #282c34;
+  }
+  
+  .controls {
+    display: flex;
+    align-items: center;
+  }
+  
+  .queue-list {
+    width: 80%;
+    margin: 20px auto;
+    max-height: 300px;
+    overflow-y: auto; /* Adaugă un scrollbar pentru listă */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+  }
+  
+  .queue-item {
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .guest-list, .playlist-container {
+    width: 80%;
+    margin: 20px auto;
+    max-height: 300px;
+    overflow-y: auto; /* Adaugă un scrollbar pentru listă */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .guest-item, .song-item, .queue-item {
+    margin: 10px;
+    color: #61dafb;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .action-button, .party-control-button {
+    margin: 5px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .action-button:hover, .party-control-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .party-input {
+    padding: 10px;
+    margin-right: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 70%; /* Ajustează lățimea input-urilor pentru a se potrivi cu lățimea listelor */
+  }
+  
+  .time-picker {
+    margin-right: 20px; /* Așează selectorul de timp în dreapta */
+  }
+  
