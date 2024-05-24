@@ -1,5 +1,11 @@
 import React, { useState } from "react";
 import './PartyPage.css';
+import { useNavigate } from 'react-router-dom';
+import { useMusicPlayer } from '../components/MusicPlayerContext';
+
+// În cadrul componentei PartyPage
+
+
 
 const PartyPage = () => {
     const [guests, setGuests] = useState(["Alice", "Bob", "Charlie"]);
@@ -9,6 +15,21 @@ const PartyPage = () => {
     const [newGuest, setNewGuest] = useState("");
     const [newSong, setNewSong] = useState("");
     const [isPlaying, setIsPlaying] = useState(false);
+    const { isDJPlaying, isMusicPlaying, toggleMusicPlayback, toggleDJ } = useMusicPlayer();
+
+
+    
+    const handlePlayPause = () => {
+        toggleMusicPlayback();
+    };
+
+    const navigate = useNavigate();
+
+    const navigateToDJPage = () => {
+        // Asum că vrei să oprești muzica înainte de navigare
+        setIsPlaying(false);  // Asigură-te că această stare este corect gestionată în componentă
+        navigate('/party-dj');
+    };
 
     const handleAddGuest = () => {
         if (newGuest) {
@@ -32,9 +53,9 @@ const PartyPage = () => {
         setSongs(songs.filter((_, i) => i !== index));
     };
 
-    const handlePlayPause = () => {
-        setIsPlaying(!isPlaying);
-    };
+    // const handlePlayPause = () => {
+    //     setIsPlaying(!isPlaying);
+    // };
 
     const handleDeleteParty = () => {
         setGuests([]); // Clear all guests
@@ -54,6 +75,10 @@ const PartyPage = () => {
                         <input type="time" defaultValue="19:00"/>
                     </div>
                     <button className="action-button" onClick={toggleQueue}>Show Queue</button>
+                    <button className="action-button" onClick={navigateToDJPage}>Go to DJ Page</button>
+                    <button className="party-control-button" onClick={handlePlayPause}>
+                        {isDJPlaying ? 'DJ is playing' : isMusicPlaying ? 'Pause Music' : 'Play Music'}
+                    </button>
                 </div>
             </header>
             {showQueue && (
@@ -98,7 +123,7 @@ const PartyPage = () => {
                 />
                 <button className="action-button" onClick={handleAddSong}>Add Song</button>
                 <button className="party-control-button" onClick={handlePlayPause}>
-                    {isPlaying ? 'Pause' : 'Play'}
+                    {isMusicPlaying ? 'Pause Music' : 'Play Music'}
                 </button>
             </div>
             <button className="party-control-button" onClick={handleDeleteParty}>Delete Party</button>

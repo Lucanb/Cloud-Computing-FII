@@ -14,6 +14,8 @@ import ArtistPage from "./pages/ArtistPage";
 import NewsComponent from "./components/NewsComponent";
 import GalleryComponent from './components/GalleryComponent';
 import PartyPage from './pages/PartyPage';
+import DJPage from './components/DJPage'
+import MessagingPage from './pages/MessagingPage';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -54,6 +56,8 @@ function App() {
                         <Route exact path="/artist/:id" element={<Protected><ArtistPage /></Protected>} />
                         <Route exact path="/news" element={<Protected><NewsComponent /></Protected>} />
                         <Route exact path="/gallery" element={<Protected><GalleryComponent /></Protected>} />
+                        <Route path="/party-dj" element={<Protected><DJPage /></Protected>} />
+                        <Route path="/messagePage" element={<Protected><MessagingPage /></Protected>} />
                     </Routes>
                 </AuthProvider>
             </Router>

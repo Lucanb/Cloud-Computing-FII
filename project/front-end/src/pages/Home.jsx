@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-// import { SearchResult } from "../components/SerchResults"; // Am corectat importul
+// import { SearchResult } from "../components/SerchResults"; // Am corectat importul ---> deploy la front se afla in home/sw/project
 import Button from "@mui/material/Button";
 import SearchBar from "../components/SearchBar";
 import PictureList from "../components/PictureList";
