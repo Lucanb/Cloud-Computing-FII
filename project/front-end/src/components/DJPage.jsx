@@ -11,17 +11,43 @@ const DJPage = () => {
     const initialProposedSongs = location.state?.proposedSongs || ["Song 1", "Song 2", "Song 3", "Song 4"];
     const [proposedSongs, setProposedSongs] = useState(initialProposedSongs);
     const [selectedSongs, setSelectedSongs] = useState([]);
-
+    const [remixUrl, setRemixUrl] = useState("");
     const handleAddSong = (song) => {
         setSelectedSongs([...selectedSongs, song]);
+        console.log(JSON.stringify(song))
     };
 
     const handleRemoveSong = (song) => {
         setSelectedSongs(selectedSongs.filter(selectedSong => selectedSong !== song));
     };
 
-    const handleSendForRemix = () => {
-        console.log("Songs sent for remix:", selectedSongs);
+    const handleSendForRemix = async () => {
+        if (selectedSongs.length === 0) {
+            alert("Please select some songs to remix.");
+            return;
+        }
+    
+        try {
+            const response = await fetch('https://your-api-url.com/remix', { //aici se va apela functia pentru remix
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ songs: selectedSongs.map(song => song.link) }) // assuming 'link' is the URL to the song file
+            });
+            
+            const data = await response.json();
+            
+            if(response.ok) {
+                setRemixUrl(data.remixUrl); // Assuming the API returns a property 'remixUrl' that is the URL of the remixed song
+                console.log("Remix created successfully:", data.remixUrl);
+            } else {
+                throw new Error('Failed to create remix');
+            }
+        } catch (error) {
+            console.error("Error sending songs for remix:", error);
+            alert("Failed to send songs for remix.");
+        }
     };
 
     const goBack = () => {
@@ -57,7 +83,7 @@ const DJPage = () => {
             <div className="remix-container">
                 <h2>Remix</h2>
                 <audio controls>
-                    <source src="remix-url" type="audio/mpeg" />
+                    <source src={remixUrl || "placeholder.mp3"} type="audio/mpeg" /> {/* Provide a placeholder or leave it empty if remixUrl is not set */}
                     Your browser does not support the audio element.
                 </audio>
             </div>
