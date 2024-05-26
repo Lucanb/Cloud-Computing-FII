@@ -59,7 +59,7 @@ const PartyPage = () => {
         const currentPath = location.pathname;
         const id = currentPath.split("/")[2];
         if (id !== 'default') {
-            navigate(`/party-dj/${id}`);
+            navigate(`/party-dj/${id}`, { state: { proposedSongs: songs } });
         } else {
             alert('Please Create The Party first and navigate on it!');
         }
@@ -81,7 +81,6 @@ const PartyPage = () => {
             const song = existingSongs.find(song => song._id === selectedSong);
             setSongs([...songs, song]);
             setSelectedSong("");
-            handleSongClick(song);  // Add to queue and play if no current song
         }
     };
 
@@ -111,54 +110,56 @@ const PartyPage = () => {
 
     const playNextSong = () => {
         setQueue(prevQueue => {
-            const nextQueue = prevQueue.slice(1);
-            if (nextQueue.length > 0) {
-                setCurrentSong(nextQueue[0]);
-                audioRef.current.src = nextQueue[0].link;
-                audioRef.current.play().then(() => setIsPlaying(true)).catch(error => {
-                    console.error('Error playing audio:', error);
-                    setIsPlaying(false);
-                });
+            if (prevQueue.length > 1) {
+                const nextSong = prevQueue[1];
+                setCurrentSong(nextSong);
+    
+                return prevQueue.slice(1);
             } else {
+                setCurrentSong(null);
                 setIsPlaying(false);
+                return [];
             }
-            return nextQueue;
         });
     };
-
+    
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
-
+    
         const endListener = () => playNextSong();
         audio.addEventListener('ended', endListener);
-        return () => audio.removeEventListener('ended', endListener);
-    }, [queue]);
-
+        return () => {
+            audio.removeEventListener('ended', endListener);
+        };
+    }, []);
+    
     useEffect(() => {
-        const audio = audioRef.current;
-        if (audio && isPlaying) {
-            audio.play().catch(error => {
-                console.error('Error playing audio:', error);
-                setIsPlaying(false);
-            });
-        } else if (audio) {
-        }
-    }, [isPlaying]);
-
-    useEffect(() => {
-        const audio = audioRef.current;
-        if (audio && currentSong) {
-            audio.src = currentSong.link;
-            audio.load();
+        if (currentSong) {
+            audioRef.current.src = currentSong.link; // Ensure src is updated
+            audioRef.current.load(); // Load the new audio source
             if (isPlaying) {
-                audio.play().catch(error => {
-                    console.error('Error playing audio:', error);
+                audioRef.current.play().catch(error => {
+                    console.error('Error playing the new source:', error);
                     setIsPlaying(false);
                 });
             }
         }
     }, [currentSong]);
+    
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (audio) {
+            if (isPlaying) {
+                audio.play().catch(error => {
+                    console.error('Playback error:', error);
+                    setIsPlaying(false);
+                });
+            } else {
+                audio.pause();
+            }
+        }
+    }, [isPlaying]);
 
     return (
         <div className="App">
@@ -210,8 +211,8 @@ const PartyPage = () => {
                     <div key={index} className="song-item">
                         {song.title} - by {song.artist}
                         <div>
-                        <button className="action-button" onClick={() => handleRemoveSong(index)}>Remove</button>
                         <button className="action-button" onClick={() => handleSongClick(song)}>Add to Queue</button>
+                        <button className="action-button" onClick={() => handleRemoveSong(index)}>Remove</button>
                     </div></div>
                 ))}
                 <select

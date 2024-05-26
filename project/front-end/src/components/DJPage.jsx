@@ -1,11 +1,16 @@
+// DJPage.jsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './DJPage.css'
+import { useNavigate, useLocation } from 'react-router-dom';
+import './DJPage.css';
 
 const DJPage = () => {
-    const [proposedSongs, setProposedSongs] = useState(["Song 1", "Song 2", "Song 3", "Song 4"]); // Lista de melodii propuse
-    const [selectedSongs, setSelectedSongs] = useState([]); // Lista de melodii selectate pentru remix
+    const location = useLocation();
     const navigate = useNavigate();
+
+    // Retrieve proposed songs passed from PartyPage or use default list
+    const initialProposedSongs = location.state?.proposedSongs || ["Song 1", "Song 2", "Song 3", "Song 4"];
+    const [proposedSongs, setProposedSongs] = useState(initialProposedSongs);
+    const [selectedSongs, setSelectedSongs] = useState([]);
 
     const handleAddSong = (song) => {
         setSelectedSongs([...selectedSongs, song]);
@@ -16,12 +21,11 @@ const DJPage = () => {
     };
 
     const handleSendForRemix = () => {
-        // Logică pentru trimiterea melodiilor selectate pentru remix
-        console.log("Melodii trimise pentru remix:", selectedSongs);
+        console.log("Songs sent for remix:", selectedSongs);
     };
 
     const goBack = () => {
-        navigate(-1); // Acesta este echivalentul funcției goBack din versiunile anterioare
+        navigate(-1);
     };
 
     return (
@@ -32,7 +36,7 @@ const DJPage = () => {
                 <div className="songs-list">
                     {proposedSongs.map((song, index) => (
                         <div key={index} className="song-item">
-                            {song}
+                            {song.title} - {song.artist} {/* Ensure you are displaying strings, not objects */}
                             <button onClick={() => handleAddSong(song)}>+</button>
                             <button onClick={() => handleRemoveSong(song)}>-</button>
                         </div>
@@ -44,7 +48,7 @@ const DJPage = () => {
                 <div className="songs-list">
                     {selectedSongs.map((song, index) => (
                         <div key={index} className="song-item">
-                            {song}
+                            {song.title} - {song.artist} {/* Access the title and artist properties of the song */}
                         </div>
                     ))}
                 </div>
