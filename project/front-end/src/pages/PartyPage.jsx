@@ -3,10 +3,6 @@ import './PartyPage.css';
 import { useNavigate } from 'react-router-dom';
 import { useMusicPlayer } from '../components/MusicPlayerContext';
 
-// În cadrul componentei PartyPage
-
-
-
 const PartyPage = () => {
     const [guests, setGuests] = useState(["Alice", "Bob", "Charlie"]);
     const [songs, setSongs] = useState(["Song 1", "Song 2", "Song 3"]);
@@ -17,7 +13,9 @@ const PartyPage = () => {
     const [isPlaying, setIsPlaying] = useState(false);
     const { isDJPlaying, isMusicPlaying, toggleMusicPlayback, toggleDJ } = useMusicPlayer();
 
-
+    const handleCreateParty = () => {
+        alert("Party created with the current guests and playlist!");
+    };
     
     const handlePlayPause = () => {
         toggleMusicPlayback();
@@ -106,6 +104,7 @@ const PartyPage = () => {
                 />
                 <button className="action-button" onClick={handleAddGuest}>+</button>
             </div>
+            <button className="create-party-button" onClick={handleCreateParty}>Create Party</button>
             <div className="playlist-container">
                 <h2>Playlist</h2>
                 {songs.map((song, index) => (
