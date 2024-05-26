@@ -1,18 +1,20 @@
-import React, {useContext, useState} from "react";
+import React, { useContext, useState } from "react";
+import { AuthContext } from "../middleware";
+import { BlobServiceClient } from "@azure/storage-blob";
 import './Forms.css';
-import {AuthContext} from "../middleware";
 
 const AddSongModal = ({ isOpen, onClose }) => {
     const user = useContext(AuthContext);
-    console.log("Artist page:",user);
     const [songData, setSongData] = useState({
         title: "",
         artist: "",
         album: "",
         releaseDate: "",
-        link: "",
         duration: "",
     });
+    const [file, setFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [verificationMessage, setVerificationMessage] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -22,8 +24,69 @@ const AddSongModal = ({ isOpen, onClose }) => {
         }));
     };
 
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0]);
+    };
+
+    const uploadFileToBlob = async () => {
+        if (!file) return null;
+
+        setUploading(true);
+        const blobServiceClient = new BlobServiceClient(`https://musicappluca.blob.core.windows.net/?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiyx&se=2024-08-20T00:03:21Z&st=2024-05-19T16:03:21Z&spr=https&sig=TAiN0%2BNPbD1Ie5l5aLSpDgXwEdGKYSrmUY50H%2BTEBPg%3D`);
+        const containerClient = blobServiceClient.getContainerClient("songs");
+        const blobName = `${Date.now()}-${file.name}`;
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+        try {
+            await blockBlobClient.uploadBrowserData(file);
+            return blockBlobClient.url;
+        } catch (error) {
+            console.error('Error uploading file to Blob Storage:', error);
+            return null;
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const verifyCopyright = async (blobUrl) => {
+        try {
+            const response = await fetch(`https://music-app-luca.azurewebsites.net/api/verify`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ blobUrl }),
+            });
+            const result = await response.json();
+            console.log('verif results : ',result)
+            return result;
+        } catch (error) {
+            console.error('Error verifying copyright:', error);
+            return { isProtected: false, message: 'Verification failed.' };
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const fileUrl = await uploadFileToBlob();
+
+        if (!fileUrl) {
+            console.error('Failed to upload file to Blob Storage');
+            return;
+        }
+
+        const verificationResult = await verifyCopyright(fileUrl);
+        if (verificationResult.isProtected) {
+            setVerificationMessage(verificationResult.message);
+            console.log('Results : ',verificationResult)
+            console.log('Ress mesasge : ',verificationResult.message)
+            return;
+        }
+
+        const songDataWithLink = {
+            ...songData,
+            link: fileUrl,
+        };
 
         try {
             const response = await fetch(`https://music-app-luca.azurewebsites.net/api/songs/save/${user.uid}`, {
@@ -31,10 +94,10 @@ const AddSongModal = ({ isOpen, onClose }) => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(songData),
+                body: JSON.stringify(songDataWithLink),
             });
             console.log(response);
-            console.log(songData)
+            console.log(songDataWithLink);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -44,9 +107,10 @@ const AddSongModal = ({ isOpen, onClose }) => {
                 artist: "",
                 album: "",
                 releaseDate: "",
-                link: "",
                 duration: "",
             });
+            setFile(null);
+            setVerificationMessage('');
 
             onClose();
             window.location.reload();
@@ -60,10 +124,11 @@ const AddSongModal = ({ isOpen, onClose }) => {
             {isOpen && (
                 <div className="modal">
                     <div className="modal-content">
-            <span className="close" onClick={onClose}>
-              &times;
-            </span>
+                        <span className="close" onClick={onClose}>
+                            &times;
+                        </span>
                         <h2>Add New Song</h2>
+                        {verificationMessage && <p style={{ color: 'red' }}>{verificationMessage}</p>}
                         <form onSubmit={handleSubmit} className="addForm">
                             <input
                                 type="text"
@@ -103,15 +168,6 @@ const AddSongModal = ({ isOpen, onClose }) => {
                             />
                             <input
                                 type="text"
-                                id="link"
-                                name="link"
-                                value={songData.link}
-                                onChange={handleChange}
-                                required
-                                placeholder="Link"
-                            />
-                            <input
-                                type="text"
                                 id="duration"
                                 name="duration"
                                 value={songData.duration}
@@ -119,7 +175,16 @@ const AddSongModal = ({ isOpen, onClose }) => {
                                 required
                                 placeholder="Duration"
                             />
-                            <button type="submit">Add Song</button>
+                            <input
+                                type="file"
+                                id="file"
+                                name="file"
+                                onChange={handleFileChange}
+                                required
+                            />
+                            <button type="submit" disabled={uploading}>
+                                {uploading ? "Uploading..." : "Add Song"}
+                            </button>
                         </form>
                     </div>
                 </div>
