@@ -79,14 +79,14 @@ export default function MusicPlayer({ currentSong, currentIndex, songs, setSongs
                     ""
                 )}
                 <div className={"control-icon"}>
-                    <BiSkipPreviousCircle color={"white"} size={50} className={"icons"} />
+                    <BiSkipPreviousCircle color={"black"} size={50} className={"icons"} />
                     {isPlaying ? (
-                        <BiPauseCircle color={"white"} size={70} className={"icons"} onClick={togglePlay} />
+                        <BiPauseCircle color={"black"} size={70} className={"icons"} onClick={togglePlay} />
                     ) : (
-                        <BiPlayCircle color={"white"} size={70} className={"icons"} onClick={togglePlay} />
+                        <BiPlayCircle color={"black"} size={70} className={"icons"} onClick={togglePlay} />
                     )}
-                    <BiSkipNextCircle color={"white"} size={50} className={"icons"} />
-                    <BiTrash color={'white'} size={30} className={'icons'} onClick={handleDeleteSong} />
+                    <BiSkipNextCircle color={"black"} size={50} className={"icons"} />
+                    <BiTrash color={'grey'} size={30} className={'icons'} onClick={handleDeleteSong} />
                 </div>
             </div>
         </div>

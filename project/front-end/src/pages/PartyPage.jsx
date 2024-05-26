@@ -1,41 +1,67 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import './PartyPage.css';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useMusicPlayer } from '../components/MusicPlayerContext';
+import { AuthContext } from "../middleware";
 
 const PartyPage = () => {
     const [guests, setGuests] = useState(["Alice", "Bob", "Charlie"]);
-    const [songs, setSongs] = useState(["Song 1", "Song 2", "Song 3"]);
-    const [queue, setQueue] = useState(["Song 4", "Song 5"]);
+    const [songs, setSongs] = useState([]);
+    const [queue, setQueue] = useState([]);
     const [showQueue, setShowQueue] = useState(false);
     const [newGuest, setNewGuest] = useState("");
-    const [newSong, setNewSong] = useState("");
-    const { isDJPlaying, isMusicPlaying, toggleMusicPlayback } = useMusicPlayer();
+    const [existingSongs, setExistingSongs] = useState([]);
+    const [selectedSong, setSelectedSong] = useState("");
+    const [currentSong, setCurrentSong] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const audioRef = useRef(null);
+    const user = useContext(AuthContext);
 
     const location = useLocation();
     const navigate = useNavigate();
 
     useEffect(() => {
-        console.log("Current location:", location);
-    }, [location]);
+        if (user) {
+            const userId = user.uid;
+            fetchUserSongs(userId);
+        }
+    }, [user]);
+
+    const fetchUserSongs = async (userId) => {
+        try {
+            const response = await fetch(`https://music-app-luca.azurewebsites.net/api/songs/getAll/${userId}`);
+            const data = await response.json();
+            setExistingSongs(data);
+        } catch (error) {
+            console.error('Error fetching user songs:', error);
+        }
+    };
 
     const handleCreateParty = () => {
         alert("Party created with the current guests and playlist!");
     };
 
     const handlePlayPause = () => {
-        toggleMusicPlayback();
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        if (isPlaying) {
+            audio.pause();
+        } else {
+            audio.play().catch(error => {
+                console.error('Error playing audio:', error);
+                setIsPlaying(false);
+            });
+        }
+        setIsPlaying(!isPlaying);
     };
 
     const navigateToDJPage = () => {
         const currentPath = location.pathname;
-        const id = currentPath.split("/")[2]; // Extracting the ID from the URL
-        console.log("Navigating to DJ page with ID:", id); // Debugging log
+        const id = currentPath.split("/")[2];
         if (id !== 'default') {
             navigate(`/party-dj/${id}`);
         } else {
-            alert('Please Create The Party first and navigate on it!')
-            console.log("Cannot navigate to DJ page because ID is 'default'.");
+            alert('Please Create The Party first and navigate on it!');
         }
     };
 
@@ -51,9 +77,11 @@ const PartyPage = () => {
     };
 
     const handleAddSong = () => {
-        if (newSong) {
-            setSongs([...songs, newSong]);
-            setNewSong("");
+        if (selectedSong) {
+            const song = existingSongs.find(song => song._id === selectedSong);
+            setSongs([...songs, song]);
+            setSelectedSong("");
+            handleSongClick(song);  // Add to queue and play if no current song
         }
     };
 
@@ -64,11 +92,73 @@ const PartyPage = () => {
     const handleDeleteParty = () => {
         setGuests([]);
         setSongs([]);
+        setQueue([]);
+        setCurrentSong(null);
+        setIsPlaying(false);
     };
 
     const toggleQueue = () => {
         setShowQueue(!showQueue);
     };
+
+    const handleSongClick = (song) => {
+        setQueue(prevQueue => [...prevQueue, song]);
+        if (!currentSong) {
+            setCurrentSong(song);
+            setIsPlaying(true);
+        }
+    };
+
+    const playNextSong = () => {
+        setQueue(prevQueue => {
+            const nextQueue = prevQueue.slice(1);
+            if (nextQueue.length > 0) {
+                setCurrentSong(nextQueue[0]);
+                audioRef.current.src = nextQueue[0].link;
+                audioRef.current.play().then(() => setIsPlaying(true)).catch(error => {
+                    console.error('Error playing audio:', error);
+                    setIsPlaying(false);
+                });
+            } else {
+                setIsPlaying(false);
+            }
+            return nextQueue;
+        });
+    };
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        const endListener = () => playNextSong();
+        audio.addEventListener('ended', endListener);
+        return () => audio.removeEventListener('ended', endListener);
+    }, [queue]);
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (audio && isPlaying) {
+            audio.play().catch(error => {
+                console.error('Error playing audio:', error);
+                setIsPlaying(false);
+            });
+        } else if (audio) {
+        }
+    }, [isPlaying]);
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (audio && currentSong) {
+            audio.src = currentSong.link;
+            audio.load();
+            if (isPlaying) {
+                audio.play().catch(error => {
+                    console.error('Error playing audio:', error);
+                    setIsPlaying(false);
+                });
+            }
+        }
+    }, [currentSong]);
 
     return (
         <div className="App">
@@ -81,7 +171,7 @@ const PartyPage = () => {
                     <button className="action-button" onClick={toggleQueue}>Show Queue</button>
                     <button className="action-button" onClick={navigateToDJPage}>Go to DJ Page</button>
                     <button className="party-control-button" onClick={handlePlayPause}>
-                        {isDJPlaying ? 'DJ is playing' : isMusicPlaying ? 'Pause Music' : 'Play Music'}
+                        {isPlaying ? 'DJ is playing' : isPlaying ? 'Pause Music' : 'Play Music'}
                     </button>
                 </div>
             </header>
@@ -89,10 +179,11 @@ const PartyPage = () => {
                 <div className="queue-list">
                     <h2>Songs in Queue</h2>
                     {queue.map((song, index) => (
-                        <div key={index} className="queue-item">{song}</div>
+                        <div key={index} className="queue-item">{song.title} - by {song.artist}</div>
                     ))}
                 </div>
             )}
+            <audio ref={audioRef} />
             <div className="guest-list">
                 <h2>Guest List</h2>
                 {guests.map((guest, index) => (
@@ -117,20 +208,27 @@ const PartyPage = () => {
                 <h2>Playlist</h2>
                 {songs.map((song, index) => (
                     <div key={index} className="song-item">
-                        {song}
+                        {song.title} - by {song.artist}
+                        <div>
                         <button className="action-button" onClick={() => handleRemoveSong(index)}>Remove</button>
-                    </div>
+                        <button className="action-button" onClick={() => handleSongClick(song)}>Add to Queue</button>
+                    </div></div>
                 ))}
-                <input
-                    type="text"
-                    value={newSong}
-                    onChange={(e) => setNewSong(e.target.value)}
-                    placeholder="Add new song"
+                <select
+                    value={selectedSong}
+                    onChange={(e) => setSelectedSong(e.target.value)}
                     className="party-input"
-                />
+                >
+                    <option value="">Select existing song</option>
+                    {existingSongs.map((song) => (
+                        <option key={song._id} value={song._id}>
+                            {song.title} - by {song.artist} - {song.album}
+                        </option>
+                    ))}
+                </select>
                 <button className="action-button" onClick={handleAddSong}>Add Song</button>
                 <button className="party-control-button" onClick={handlePlayPause}>
-                    {isMusicPlaying ? 'Pause Music' : 'Play Music'}
+                    {isPlaying ? 'Pause Music' : 'Play Music'}
                 </button>
             </div>
             <button className="party-control-button" onClick={handleDeleteParty}>Delete Party</button>
