@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import './PartyPage.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMusicPlayer } from '../components/MusicPlayerContext';
@@ -10,25 +10,33 @@ const PartyPage = () => {
     const [showQueue, setShowQueue] = useState(false);
     const [newGuest, setNewGuest] = useState("");
     const [newSong, setNewSong] = useState("");
-    const [isPlaying, setIsPlaying] = useState(false);
-    const { isDJPlaying, isMusicPlaying, toggleMusicPlayback, toggleDJ } = useMusicPlayer();
-
-    const handleCreateParty = () => {
-        alert("Party created with the current guests and playlist!");
-    };
-    
-    const handlePlayPause = () => {
-        toggleMusicPlayback();
-    };
+    const { isDJPlaying, isMusicPlaying, toggleMusicPlayback } = useMusicPlayer();
 
     const location = useLocation();
     const navigate = useNavigate();
 
-    console.log("Current location:", location);
+    useEffect(() => {
+        console.log("Current location:", location);
+    }, [location]);
+
+    const handleCreateParty = () => {
+        alert("Party created with the current guests and playlist!");
+    };
+
+    const handlePlayPause = () => {
+        toggleMusicPlayback();
+    };
 
     const navigateToDJPage = () => {
-        setIsPlaying(false);
-        navigate('/party-dj');
+        const currentPath = location.pathname;
+        const id = currentPath.split("/")[2]; // Extracting the ID from the URL
+        console.log("Navigating to DJ page with ID:", id); // Debugging log
+        if (id !== 'default') {
+            navigate(`/party-dj/${id}`);
+        } else {
+            alert('Please Create The Party first and navigate on it!')
+            console.log("Cannot navigate to DJ page because ID is 'default'.");
+        }
     };
 
     const handleAddGuest = () => {
@@ -53,10 +61,6 @@ const PartyPage = () => {
         setSongs(songs.filter((_, i) => i !== index));
     };
 
-    // const handlePlayPause = () => {
-    //     setIsPlaying(!isPlaying);
-    // };
-
     const handleDeleteParty = () => {
         setGuests([]);
         setSongs([]);
@@ -66,14 +70,13 @@ const PartyPage = () => {
         setShowQueue(!showQueue);
     };
 
-
     return (
         <div className="App">
             <header className="party-header">
                 <h1>Party Planner</h1>
                 <div className="controls">
                     <div className="time-picker">
-                        <input type="time" defaultValue="19:00"/>
+                        <input type="time" defaultValue="19:00" />
                     </div>
                     <button className="action-button" onClick={toggleQueue}>Show Queue</button>
                     <button className="action-button" onClick={navigateToDJPage}>Go to DJ Page</button>
@@ -106,10 +109,10 @@ const PartyPage = () => {
                     className="party-input"
                 />
                 <button className="action-button" onClick={handleAddGuest}>+</button>
-            </div>
-            {location.pathname === "/party/default" && (
+                {location.pathname === "/party/default" && (
                     <button className="create-party-button" onClick={handleCreateParty}>Create Party</button>
                 )}
+            </div>
             <div className="playlist-container">
                 <h2>Playlist</h2>
                 {songs.map((song, index) => (
