@@ -39,7 +39,7 @@ app.http('getIdAfterEmail', {
             const userRecord = await admin.auth().getUserByEmail(email);
             const  id = userRecord.uid
             console.log(`User record found: ${JSON.stringify(userRecord)}`);
-            return { body: id };
+            return {status: 200, body: JSON.stringify({ id }) };
         } catch (error) {
             console.error('Error fetching user by email:', error);
             context.res = {

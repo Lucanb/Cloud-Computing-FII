@@ -30,9 +30,11 @@ const SendMessagePage = ({ userId }) => {
     const fetchRecipientId = async (email) => {
         try {
             const response = await fetch(`https://user-function-luca.azurewebsites.net/api/getIdAfterEmail/${email}`);
+            console.log(response)
             const data = await response.json();
+
             if (response.ok) {
-                return data.userId;
+                return data.id;
             } else {
                 throw new Error('Failed to fetch recipient ID');
             }
