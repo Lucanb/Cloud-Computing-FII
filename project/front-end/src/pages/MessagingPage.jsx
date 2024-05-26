@@ -13,7 +13,7 @@ const MessagingPage = () => {
 
     return (
         <div className="container">
-            <SendMessagePage onSendMessage={handleSendMessage} />
+            <SendMessagePage userId={user.uid} onSendMessage={handleSendMessage} />
             <NotificationBar messages={messages} />
         </div>
     );

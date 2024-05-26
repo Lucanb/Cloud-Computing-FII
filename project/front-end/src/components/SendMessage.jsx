@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './MessPageStyle.css';
 
 const SendMessagePage = ({ userId }) => {
+    console.log(userId)
     const [recipientName, setRecipientName] = useState('');
     const [fileLink, setFileLink] = useState('');
     const [notifications, setNotifications] = useState([]);
