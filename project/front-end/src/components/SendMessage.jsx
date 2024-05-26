@@ -64,7 +64,7 @@ const SendMessagePage = ({ userId }) => {
 
         setFileLink(uploadedUrl);
         const messageData = {
-            id_reciever: 'E5cKrGgMmDgCKacrg5w7sAhnbyo2',
+            id_reciever: recipientName, //aici trebuie sa luam id-ul dupa username 
             link_melodie: uploadedUrl
         };
 
