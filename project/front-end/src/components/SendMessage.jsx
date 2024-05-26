@@ -27,6 +27,22 @@ const SendMessagePage = ({ userId }) => {
         }
     };
 
+    const fetchRecipientId = async (email) => {
+        try {
+            const response = await fetch(`https://user-function-luca.azurewebsites.net/api/getIdAfterEmail/${email}`);
+            const data = await response.json();
+            if (response.ok) {
+                return data.userId;
+            } else {
+                throw new Error('Failed to fetch recipient ID');
+            }
+        } catch (error) {
+            console.error('Error fetching recipient ID:', error);
+            return null;
+        }
+    };
+
+
     useEffect(() => {
         fetchNotifications();
     }, []);
@@ -63,8 +79,14 @@ const SendMessagePage = ({ userId }) => {
         }
 
         setFileLink(uploadedUrl);
+        const id_reciever = await fetchRecipientId(recipientName);
+        if (!id_reciever) {
+            alert('Failed to fetch recipient ID');
+            return;
+        }
+    
         const messageData = {
-            id_reciever: recipientName, //aici trebuie sa luam id-ul dupa username 
+            id_reciever: id_reciever,
             link_melodie: uploadedUrl
         };
 
