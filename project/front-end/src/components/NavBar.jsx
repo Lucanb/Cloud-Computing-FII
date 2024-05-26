@@ -18,7 +18,7 @@ const NavBar = ({ onLogout }) => {
             <Button color="inherit" onClick={onLogout}>LogOut</Button>
             <Button color="inherit" component={Link} to="/news">News</Button>
             <Button color="inherit" component={Link} to="/gallery">Gallery</Button>
-            <Button color="inherit" component={Link} to="/party">Your Party</Button>
+            <Button color="inherit" component={Link} to="/party/default">Your Party</Button>
           </>
         ) : (
           <>

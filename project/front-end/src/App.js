@@ -50,13 +50,13 @@ function App() {
                         <Route exact path="/login" element={<SigIn onLogin={handleLogin} />} />
                         <Route exact path="/signup" element={<SignUp />} />
                         <Route path="/home" element={<Protected><Home /></Protected>} />
-                        <Route exact path="/party" element={<Protected>< PartyPage/></Protected>} />
+                        <Route exact path="/party/:id" element={<Protected>< PartyPage/></Protected>} />
                         {/*<Route exact path="/home" element={<Home />} />*/}
                         <Route exact path="/music/:id" element={<Protected><MusicPage /></Protected>} />
                         <Route exact path="/artist/:id" element={<Protected><ArtistPage /></Protected>} />
+                        <Route path="/party-dj/:id" element={<Protected><DJPage /></Protected>} />
                         <Route exact path="/news" element={<Protected><NewsComponent /></Protected>} />
                         <Route exact path="/gallery" element={<Protected><GalleryComponent /></Protected>} />
-                        <Route path="/party-dj" element={<Protected><DJPage /></Protected>} />
                         <Route path="/messagePage" element={<Protected><MessagingPage /></Protected>} />
                     </Routes>
                 </AuthProvider>

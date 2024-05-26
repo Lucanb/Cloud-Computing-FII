@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import './PartyPage.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useMusicPlayer } from '../components/MusicPlayerContext';
 
 const PartyPage = () => {
@@ -21,7 +21,10 @@ const PartyPage = () => {
         toggleMusicPlayback();
     };
 
+    const location = useLocation();
     const navigate = useNavigate();
+
+    console.log("Current location:", location);
 
     const navigateToDJPage = () => {
         // Asum că vrei să oprești muzica înainte de navigare
@@ -64,6 +67,7 @@ const PartyPage = () => {
         setShowQueue(!showQueue);
     };
 
+
     return (
         <div className="App">
             <header className="party-header">
@@ -104,7 +108,9 @@ const PartyPage = () => {
                 />
                 <button className="action-button" onClick={handleAddGuest}>+</button>
             </div>
-            <button className="create-party-button" onClick={handleCreateParty}>Create Party</button>
+            {location.pathname === "/party/default" && (
+                    <button className="create-party-button" onClick={handleCreateParty}>Create Party</button>
+                )}
             <div className="playlist-container">
                 <h2>Playlist</h2>
                 {songs.map((song, index) => (
