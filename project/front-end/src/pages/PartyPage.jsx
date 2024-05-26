@@ -27,8 +27,7 @@ const PartyPage = () => {
     console.log("Current location:", location);
 
     const navigateToDJPage = () => {
-        // Asum că vrei să oprești muzica înainte de navigare
-        setIsPlaying(false);  // Asigură-te că această stare este corect gestionată în componentă
+        setIsPlaying(false);
         navigate('/party-dj');
     };
 
@@ -59,8 +58,8 @@ const PartyPage = () => {
     // };
 
     const handleDeleteParty = () => {
-        setGuests([]); // Clear all guests
-        setSongs([]); // Clear the playlist
+        setGuests([]);
+        setSongs([]);
     };
 
     const toggleQueue = () => {
