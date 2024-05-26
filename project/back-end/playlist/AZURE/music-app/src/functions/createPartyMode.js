@@ -16,7 +16,6 @@ async function connectToDatabase() {
     }
 }
 
-// Create Party
 async function createParty(admin) {
     const db = await connectToDatabase();
     try {

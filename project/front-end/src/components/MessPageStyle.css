@@ -62,6 +62,7 @@
     right: 20px;
     top: 20px;
     overflow-y: auto;
+    z-index: 100; /* Ensure it is above other content */
 }
 
 .notifications-bar h2 {
