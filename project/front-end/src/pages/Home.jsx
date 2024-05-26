@@ -31,6 +31,10 @@ const Home = () => {
         setResults(searchResults);
     };
 
+    const handleSeeMessages = () => {
+        navigate(`/messagePage/${user.uid}`);
+    };
+
     const openAddArtistModal = () => {
         setIsAddArtistModalOpen(true);
     };
@@ -71,6 +75,7 @@ const Home = () => {
                         <Button color="inherit" onClick={openAddArtistModal}>Add Artist</Button>
                         <Button color="inherit" onClick={openAddAlbumModal}>Add Album</Button>
                         <Button color="inherit" onClick={togglePartyNav}>Show Parties</Button>
+                        <Button color="inherit" onClick={handleSeeMessages}>See Your Messages</Button>
                     </div>
                     {isAddArtistModalOpen && <AddArtistModal onClose={() => setIsAddArtistModalOpen(false)} />}
                     {isAddAlbumModalOpen && <AddAlbumModal onClose={() => setIsAddAlbumModalOpen(false)} />}

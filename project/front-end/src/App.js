@@ -57,7 +57,7 @@ function App() {
                         <Route path="/party-dj/:id" element={<Protected><DJPage /></Protected>} />
                         <Route exact path="/news" element={<Protected><NewsComponent /></Protected>} />
                         <Route exact path="/gallery" element={<Protected><GalleryComponent /></Protected>} />
-                        <Route path="/messagePage" element={<Protected><MessagingPage /></Protected>} />
+                        <Route path="/messagePage/:id" element={<Protected><MessagingPage /></Protected>} />
                     </Routes>
                 </AuthProvider>
             </Router>
