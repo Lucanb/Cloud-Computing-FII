@@ -1,5 +1,5 @@
 // DJPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './DJPage.css';
 
@@ -8,13 +8,18 @@ const DJPage = () => {
     const navigate = useNavigate();
 
     // Retrieve proposed songs passed from PartyPage or use default list
-    const initialProposedSongs = location.state?.proposedSongs || ["Song 1", "Song 2", "Song 3", "Song 4"];
+    const initialProposedSongs = location.state?.proposedSongs || [];
     const [proposedSongs, setProposedSongs] = useState(initialProposedSongs);
     const [selectedSongs, setSelectedSongs] = useState([]);
     const [remixUrl, setRemixUrl] = useState("");
+
+    useEffect(() => {
+        console.log('Proposed Songs:', proposedSongs); // Log to verify proposed songs
+    }, [proposedSongs]);
+
     const handleAddSong = (song) => {
         setSelectedSongs([...selectedSongs, song]);
-        console.log(JSON.stringify(song))
+        console.log(JSON.stringify(song));
     };
 
     const handleRemoveSong = (song) => {
@@ -26,21 +31,22 @@ const DJPage = () => {
             alert("Please select some songs to remix.");
             return;
         }
-    
+
         try {
-            const response = await fetch('https://your-api-url.com/remix', { //aici se va apela functia pentru remix
+            const response = await fetch('https://music-functions-luca.azurewebsites.net/api/generate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ songs: selectedSongs.map(song => song.link) }) // assuming 'link' is the URL to the song file
+                body: JSON.stringify({ playlist: selectedSongs.map(song => ({ link: song.link, title: song.title, artist: song.artist })) })
             });
-            
+
             const data = await response.json();
-            
-            if(response.ok) {
-                setRemixUrl(data.remixUrl); // Assuming the API returns a property 'remixUrl' that is the URL of the remixed song
-                console.log("Remix created successfully:", data.remixUrl);
+
+            if (response.ok) {
+                console.log("Remix created successfully:", data.urls[0]);
+                const decodedUrl = decodeURIComponent(data.urls[0]); // Decode the URL
+                setRemixUrl(decodedUrl); // Assuming the API returns an array of URLs and we're taking the first one
             } else {
                 throw new Error('Failed to create remix');
             }
@@ -62,7 +68,7 @@ const DJPage = () => {
                 <div className="songs-list">
                     {proposedSongs.map((song, index) => (
                         <div key={index} className="song-item">
-                            {song.title} - {song.artist} {/* Ensure you are displaying strings, not objects */}
+                            {song.title} - {song.artist}
                             <button onClick={() => handleAddSong(song)}>+</button>
                             <button onClick={() => handleRemoveSong(song)}>-</button>
                         </div>
@@ -74,7 +80,7 @@ const DJPage = () => {
                 <div className="songs-list">
                     {selectedSongs.map((song, index) => (
                         <div key={index} className="song-item">
-                            {song.title} - {song.artist} {/* Access the title and artist properties of the song */}
+                            {song.title} - {song.artist}
                         </div>
                     ))}
                 </div>
@@ -82,10 +88,12 @@ const DJPage = () => {
             </div>
             <div className="remix-container">
                 <h2>Remix</h2>
-                <audio controls>
-                    <source src={remixUrl || "placeholder.mp3"} type="audio/mpeg" /> {/* Provide a placeholder or leave it empty if remixUrl is not set */}
-                    Your browser does not support the audio element.
-                </audio>
+                {remixUrl && (
+                    <audio controls>
+                        <source src={remixUrl} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                    </audio>
+                )}
             </div>
             <button className="action-button" onClick={goBack}>Go Back to Party Planner</button>
         </div>

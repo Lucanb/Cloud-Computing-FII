@@ -23,6 +23,7 @@ async function connectToDatabase() {
     }
 }
 
+
 app.http('generate-music', {
     methods: ['POST'],
     authLevel: 'anonymous',
@@ -30,14 +31,17 @@ app.http('generate-music', {
     handler: async (request, context) => {
         const db = await connectToDatabase();
         const { playlist } = JSON.parse(await request.text());
+        console.log('Received playlist:', playlist);
 
         // Extragem numele melodiilor și numele artiștilor din playlist pentru a le folosi ca searchWords
-        const searchWords = playlist.map(item => item[1]);
-        const searchArtists = playlist.map(item => item[2]);
+        const searchWords = playlist.map(item => item.title);
+        const searchArtists = playlist.map(item => item.artist);
 
         try {
             // Obținem remixuri din baza de date
             const remixes = await db.collection("remixes").find({ songName: { $in: searchWords } }).toArray();
+            console.log('Remixes found:', remixes);
+
             const remixLinks = remixes.map(remix => remix.link);
 
             // Formăm un playlist cu link-uri, nume și artiști
@@ -53,6 +57,8 @@ app.http('generate-music', {
                             const blockBlobClient = containerClient.getBlockBlobClient(blobName);
                             selectedMixes.push(blockBlobClient.url);
                         }
+
+                        console.log('Selected mixes:', selectedMixes);
 
                         resolve({
                             status: 200,
@@ -73,6 +79,8 @@ app.http('generate-music', {
                                     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
                                     selectedBackupMixes.push(blockBlobClient.url);
                                 }
+
+                                console.log('Selected backup mixes:', selectedBackupMixes);
 
                                 resolve({
                                     status: 200,

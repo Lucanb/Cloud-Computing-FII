@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import './PartyPage.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from "../middleware";
-
 const PartyPage = () => {
     const [guests, setGuests] = useState(["Alice", "Bob", "Charlie"]);
     const [songs, setSongs] = useState([]);
@@ -13,6 +12,7 @@ const PartyPage = () => {
     const [selectedSong, setSelectedSong] = useState("");
     const [currentSong, setCurrentSong] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [partyId, setPartyId] = useState(null);
     const audioRef = useRef(null);
     const user = useContext(AuthContext);
 
@@ -29,6 +29,9 @@ const PartyPage = () => {
     const fetchUserSongs = async (userId) => {
         try {
             const response = await fetch(`https://music-app-luca.azurewebsites.net/api/songs/getAll/${userId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch songs');
+            }
             const data = await response.json();
             setExistingSongs(data);
         } catch (error) {
@@ -36,8 +39,83 @@ const PartyPage = () => {
         }
     };
 
-    const handleCreateParty = () => {
-        alert("Party created with the current guests and playlist!");
+    const handleCreateParty = async () => {
+        if (!user || !user.uid) {
+            alert("User must be logged in to create a party.");
+            return;
+        }
+    
+        try {
+            const response = await fetch('https://music-app-luca.azurewebsites.net/api/party/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ admin: user.uid }),
+            });
+    
+            if (!response.ok) {
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.message || 'Network response was not ok');
+            }
+    
+            const partyData = await response.json();
+            setPartyId(partyData.id);
+            alert(`Party created!`);
+    
+            await updateGuestList(partyData.id, guests);
+            for (const song of songs) {
+                await updatePlaylist(partyData.id, song._id, true);
+            }
+        } catch (error) {
+            console.error('Error creating party:', error);
+            alert(`Failed to create party: ${error.message}`);
+        }
+    };
+    
+
+    const updateGuestList = async (partyId, guests) => {
+        try {
+            for (const guest of guests) {
+                const response = await fetch('https://party-functions-luca.azurewebsites.net/api/party/update-guest-list', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ partyId, guestId: guest, add: true }),
+                });
+
+                if (!response.ok) {
+                    const errorResponse = await response.json();
+                    throw new Error(errorResponse.message || 'Network response was not ok');
+                }
+            }
+
+        } catch (error) {
+            console.error('Error updating guest list:', error);
+            alert(`Failed to update guest list: ${error.message}`);
+        }
+    };
+
+    const updatePlaylist = async (partyId, songId, add = true) => {
+        try {
+            const response = await fetch('https://party-functions-luca.azurewebsites.net/api/party/update-playlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ partyId, songId, add }),
+            });
+
+            if (!response.ok) {
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.message || 'Network response was not ok');
+            }
+
+        } catch (error) {
+            console.error('Error updating playlist:', error);
+            alert(`Failed to update playlist: ${error.message}`);
+        }
     };
 
     const handlePlayPause = () => {
@@ -76,16 +154,30 @@ const PartyPage = () => {
         setGuests(guests.filter((_, i) => i !== index));
     };
 
-    const handleAddSong = () => {
+    const handleAddSong = async () => {
         if (selectedSong) {
             const song = existingSongs.find(song => song._id === selectedSong);
-            setSongs([...songs, song]);
-            setSelectedSong("");
+            if (song) {
+                try {
+                    if (partyId != null)
+                        await updatePlaylist(partyId, selectedSong, true);
+                    setSongs(prevSongs => [...prevSongs, song]);
+                    setSelectedSong("");
+                } catch (error) {
+                    console.error('Error adding song to playlist:', error);
+                    alert('Failed to add song to the playlist');
+                }
+            }
         }
     };
+    
 
-    const handleRemoveSong = (index) => {
+    const handleRemoveSong = async (index) => {
+        const songId = songs[index]._id;
         setSongs(songs.filter((_, i) => i !== index));
+
+        // Update playlist in the database
+        await updatePlaylist(partyId, songId, false);
     };
 
     const handleDeleteParty = () => {
@@ -113,7 +205,7 @@ const PartyPage = () => {
             if (prevQueue.length > 1) {
                 const nextSong = prevQueue[1];
                 setCurrentSong(nextSong);
-    
+
                 return prevQueue.slice(1);
             } else {
                 setCurrentSong(null);
@@ -122,18 +214,18 @@ const PartyPage = () => {
             }
         });
     };
-    
+
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
-    
+
         const endListener = () => playNextSong();
         audio.addEventListener('ended', endListener);
         return () => {
             audio.removeEventListener('ended', endListener);
         };
     }, []);
-    
+
     useEffect(() => {
         if (currentSong) {
             audioRef.current.src = currentSong.link; // Ensure src is updated
@@ -146,7 +238,7 @@ const PartyPage = () => {
             }
         }
     }, [currentSong]);
-    
+
     useEffect(() => {
         const audio = audioRef.current;
         if (audio) {
@@ -160,8 +252,7 @@ const PartyPage = () => {
             }
         }
     }, [isPlaying]);
-
-    return (
+ return (
         <div className="App">
             <header className="party-header">
                 <h1>Party Planner</h1>
@@ -172,7 +263,7 @@ const PartyPage = () => {
                     <button className="action-button" onClick={toggleQueue}>Show Queue</button>
                     <button className="action-button" onClick={navigateToDJPage}>Go to DJ Page</button>
                     <button className="party-control-button" onClick={handlePlayPause}>
-                        {isPlaying ? 'DJ is playing' : isPlaying ? 'Pause Music' : 'Play Music'}
+                        {isPlaying ? 'Pause Music' : 'Play Music'}
                     </button>
                 </div>
             </header>
@@ -211,9 +302,10 @@ const PartyPage = () => {
                     <div key={index} className="song-item">
                         {song.title} - by {song.artist}
                         <div>
-                        <button className="action-button" onClick={() => handleSongClick(song)}>Add to Queue</button>
-                        <button className="action-button" onClick={() => handleRemoveSong(index)}>Remove</button>
-                    </div></div>
+                            <button className="action-button" onClick={() => handleSongClick(song)}>Add to Queue</button>
+                            <button className="action-button" onClick={() => handleRemoveSong(index)}>Remove</button>
+                        </div>
+                    </div>
                 ))}
                 <select
                     value={selectedSong}
