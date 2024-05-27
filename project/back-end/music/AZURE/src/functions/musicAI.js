@@ -8,48 +8,52 @@ function shuffle(array) {
     return array;
 }
 
-function findMatchingSongs(playlist, searchWords, callback) {
+function findMatchingSongs(playlist, searchWords, searchArtists, callback) {
     let matches = [];
 
     playlist.forEach(item => {
-        const [link, title] = item;
+        const [link, title, artist] = item;
         const lowerTitle = title.toLowerCase();
+        const lowerArtist = artist.toLowerCase();
         let matchCount = 0;
         let minDistance = Infinity;
 
         searchWords.forEach(word => {
             const wordLower = word.toLowerCase();
-            const distance = levenshtein.get(lowerTitle, wordLower);
+            const titleDistance = levenshtein.get(lowerTitle, wordLower);
+            const artistDistance = levenshtein.get(lowerArtist, wordLower);
 
-            if (lowerTitle.includes(wordLower)) {
+            if (lowerTitle.includes(wordLower) || lowerArtist.includes(wordLower)) {
                 matchCount++;
                 minDistance = Math.min(minDistance, 0); // potrivire exactă
-            } else if (distance <= 3 && distance > 0) { // ajustați pragul după necesități
+            } else if (titleDistance <= 3 || artistDistance <= 3) { // ajustați pragul după necesități
                 matchCount++;
-                minDistance = Math.min(minDistance, distance);
+                minDistance = Math.min(minDistance, titleDistance, artistDistance);
             }
         });
 
         if (matchCount > 0) {
-            const matchRatio = matchCount / searchWords.length;
-            matches.push({ link: link, title: title, distance: minDistance, matchRatio: matchRatio });
+            const matchRatio = matchCount / (searchWords.length + searchArtists.length);
+            matches.push({ link: link, title: title, artist: artist, distance: minDistance, matchRatio: matchRatio });
         }
     });
 
-    // Dacă nu găsim niciun cuvânt, căutăm în funcție de lungimea titlului
+    // Dacă nu găsim niciun cuvânt, căutăm în funcție de lungimea titlului și numele artistului
     if (matches.length === 0) {
         playlist.forEach(item => {
-            const [link, title] = item;
+            const [link, title, artist] = item;
             const lowerTitle = title.toLowerCase();
+            const lowerArtist = artist.toLowerCase();
             let minDistance = Infinity;
 
             searchWords.forEach(word => {
                 const wordLower = word.toLowerCase();
-                const distance = levenshtein.get(lowerTitle, wordLower);
-                minDistance = Math.min(minDistance, distance);
+                const titleDistance = levenshtein.get(lowerTitle, wordLower);
+                const artistDistance = levenshtein.get(lowerArtist, wordLower);
+                minDistance = Math.min(minDistance, titleDistance, artistDistance);
             });
 
-            matches.push({ link: link, title: title, distance: minDistance, matchRatio: 0 });
+            matches.push({ link: link, title: title, artist: artist, distance: minDistance, matchRatio: 0 });
         });
 
         // Sortăm melodiile după distanța Levenshtein (cea mai mică distanță = cea mai bună potrivire)
