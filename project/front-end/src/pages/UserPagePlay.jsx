@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
-import './PartyPage.css';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useContext, useCallback } from "react";
+import './PartyPage.css'; // Puteți schimba numele fișierului CSS dacă este necesar
+import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from "../middleware";
-const PartyPage = () => {
+
+const UserPagePlay = () => {
     const [guests, setGuests] = useState(["Alice", "Bob", "Charlie"]);
     const [songs, setSongs] = useState([]);
     const [queue, setQueue] = useState([]);
@@ -12,24 +13,11 @@ const PartyPage = () => {
     const [selectedSong, setSelectedSong] = useState("");
     const [currentSong, setCurrentSong] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [partyId, setPartyId] = useState(null);
     const audioRef = useRef(null);
     const user = useContext(AuthContext);
 
-    const location = useLocation();
+    const { partyId } = useParams();  // Extragem partyId din URL
     const navigate = useNavigate();
-    useEffect(() => {
-        const currentPath = location.pathname;
-        const possibleId = currentPath.split("/")[2];
-    
-        if (possibleId.includes("default")) {
-            setPartyId(null);
-        } else {
-            setPartyId(possibleId);
-        }
-        console.log(partyId)
-    }, [location.pathname, user]);
-    
 
     useEffect(() => {
         if (user) {
@@ -37,6 +25,12 @@ const PartyPage = () => {
             fetchUserSongs(userId);
         }
     }, [user]);
+
+    useEffect(() => {
+        if (partyId) {
+            fetchQueue();
+        }
+    }, [partyId]);
 
     const fetchUserSongs = async (userId) => {
         try {
@@ -51,88 +45,53 @@ const PartyPage = () => {
         }
     };
 
-    const handleCreateParty = async () => {
-        if (!user || !user.uid) {
-            alert("User must be logged in to create a party.");
+    const updatePlaylist = async (partyId, songId, add = true) => {
+        if (!partyId || !songId) {
+            console.error("Party ID and Song ID are required");
             return;
         }
-    
-        try {
-            const response = await fetch('https://music-app-luca.azurewebsites.net/api/party/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ admin: user.uid }),
-            });
-    
-            if (!response.ok) {
-                const errorResponse = await response.json();
-                throw new Error(errorResponse.message || 'Network response was not ok');
-            }
-    
-            const partyData = await response.json();
-            setPartyId(partyData.id);
-            alert(`Party created!`);
-    
-            await updateGuestList(partyData.id, guests);
-    
-            for (const song of songs) {
-                await updatePlaylist(partyData.id, song._id, true);
-            }
-    
-            navigate(`/party/${partyData.id}`);
-    
-        } catch (error) {
-            console.error('Error creating party:', error);
-            alert(`Failed to create party: ${error.message}`);
-        }
-    };
-    
-    const updateGuestList = async (partyId, guests) => {
-        try {
-            for (const guest of guests) {
-                const response = await fetch('https://party-functions-luca.azurewebsites.net/api/party/update-guest-list', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ partyId, guestId: guest, add: true }),
-                });
-
-                if (!response.ok) {
-                    const errorResponse = await response.json();
-                    throw new Error(errorResponse.message || 'Network response was not ok');
-                }
-            }
-
-        } catch (error) {
-            console.error('Error updating guest list:', error);
-            alert(`Failed to update guest list: ${error.message}`);
-        }
-    };
-
-    const updatePlaylist = async (partyId, songId, add = true) => {
         try {
             const response = await fetch('https://party-functions-luca.azurewebsites.net/api/party/update-playlist', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ partyId: partyId, songId: songId, add: add }),
+                body: JSON.stringify({ partyId, songId, add }),
             });
-    
+
             if (!response.ok) {
                 const errorResponse = await response.json();
-                console.error('Error updating playlist:', errorResponse.message);
-                console.error(JSON.stringify({ partyId: partyId, songId: songId, add: add }))
                 throw new Error(errorResponse.message || 'Network response was not ok');
             }
-    
-            return response;
+
         } catch (error) {
             console.error('Error updating playlist:', error);
             alert(`Failed to update playlist: ${error.message}`);
+        }
+    };
+
+    const deleteFromPlaylist = async (partyId, songId) => {
+        if (!partyId || !songId) {
+            console.error("Party ID and Song ID are required");
+            return;
+        }
+        try {
+            const response = await fetch('https://party-functions-luca.azurewebsites.net/api/party/delete-from-playlist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ partyId, songId }),
+            });
+
+            if (!response.ok) {
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.message || 'Network response was not ok');
+            }
+
+        } catch (error) {
+            console.error('Error deleting song from playlist:', error);
+            alert(`Failed to delete song from the playlist: ${error.message}`);
         }
     };
 
@@ -151,16 +110,6 @@ const PartyPage = () => {
         setIsPlaying(!isPlaying);
     };
 
-    const navigateToDJPage = () => {
-        const currentPath = location.pathname;
-        const id = currentPath.split("/")[2];
-        if (id !== 'default') {
-            navigate(`/party-dj/${id}`);
-        } else {
-            alert('Please Create The Party first and navigate on it!');
-        }
-    };
-
     const handleAddGuest = () => {
         if (newGuest) {
             setGuests([...guests, newGuest]);
@@ -168,51 +117,18 @@ const PartyPage = () => {
         }
     };
 
-    const handleRemoveGuest = async (index) => {
-        const guestToRemove = guests[index];
+    const handleRemoveGuest = (index) => {
         setGuests(guests.filter((_, i) => i !== index));
-    
-        // Update the guest list on the server
-        if (partyId != null && partyId !== "default") {
-            try {
-                const response = await fetch('https://party-functions-luca.azurewebsites.net/api/party/update-guest-list', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ partyId, guestId: guestToRemove, add: false }),
-                });
-    
-                if (!response.ok) {
-                    const errorResponse = await response.json();
-                    throw new Error(errorResponse.message || 'Network response was not ok');
-                }
-            } catch (error) {
-                console.error('Error updating guest list:', error);
-                alert(`Failed to update guest list: ${error.message}`);
-            }
-        }
     };
-    
+
     const handleAddSong = async () => {
         if (selectedSong) {
             const song = existingSongs.find(song => song._id === selectedSong);
             if (song) {
                 try {
-                    if (partyId != null && partyId !== "default") {
-
-                        console.log(`Adding song ${selectedSong} to party ${partyId}`);
-                        const response = await updatePlaylist(partyId, selectedSong, true);
-                        if (response.ok) {
-                            setSongs(prevSongs => [...prevSongs, song]);
-                            console.log(`Song ${selectedSong} added successfully`);
-                        } else {
-                            console.error('Failed to add song to playlist:', response.statusText);
-                            alert('Failed to add song to the playlist');
-                        }
-                    } else {
-                        setSongs(prevSongs => [...prevSongs, song]);
-                    }
+                    if (partyId != null)
+                        await updatePlaylist(partyId, selectedSong, true);
+                    setSongs(prevSongs => [...prevSongs, song]);
                     setSelectedSong("");
                 } catch (error) {
                     console.error('Error adding song to playlist:', error);
@@ -221,9 +137,6 @@ const PartyPage = () => {
             }
         }
     };
-    
-    
-    
 
     const handleRemoveSong = async (index) => {
         const songId = songs[index]._id;
@@ -233,19 +146,11 @@ const PartyPage = () => {
         await updatePlaylist(partyId, songId, false);
     };
 
-    const handleDeleteParty = () => {
-        setGuests([]);
-        setSongs([]);
-        setQueue([]);
-        setCurrentSong(null);
-        setIsPlaying(false);
-    };
-
     const toggleQueue = () => {
         setShowQueue(!showQueue);
     };
 
-    const handleSongClick = (song) => {
+    const handleSongClick = async (song) => {
         setQueue(prevQueue => [...prevQueue, song]);
         if (!currentSong) {
             setCurrentSong(song);
@@ -253,11 +158,12 @@ const PartyPage = () => {
         }
     };
 
-    const playNextSong = () => {
+    const playNextSong = useCallback(() => {
         setQueue(prevQueue => {
             if (prevQueue.length > 1) {
                 const nextSong = prevQueue[1];
                 setCurrentSong(nextSong);
+                deleteFromPlaylist(partyId, prevQueue[0]._id); // Delete the song from the database
 
                 return prevQueue.slice(1);
             } else {
@@ -266,7 +172,25 @@ const PartyPage = () => {
                 return [];
             }
         });
-    };
+    }, [partyId]);
+
+    const fetchQueue = useCallback(async () => {
+        if (!partyId) {
+            console.error("Party ID is required to fetch queue");
+            return;
+        }
+        try {
+            const response = await fetch(`https://party-functions-luca.azurewebsites.net/api/party/get-all-songs?partyId=${partyId}`);
+            if (!response.ok) {
+                const errorResponse = await response.json();
+                throw new Error(errorResponse.message || 'Network response was not ok');
+            }
+            const queueData = await response.json();
+            setQueue(queueData);
+        } catch (error) {
+            console.error('Error fetching queue:', error);
+        }
+    }, [partyId]);
 
     useEffect(() => {
         const audio = audioRef.current;
@@ -277,7 +201,7 @@ const PartyPage = () => {
         return () => {
             audio.removeEventListener('ended', endListener);
         };
-    }, []);
+    }, [playNextSong]);
 
     useEffect(() => {
         if (currentSong) {
@@ -290,7 +214,7 @@ const PartyPage = () => {
                 });
             }
         }
-    }, [currentSong]);
+    }, [currentSong, isPlaying]);
 
     useEffect(() => {
         const audio = audioRef.current;
@@ -305,16 +229,22 @@ const PartyPage = () => {
             }
         }
     }, [isPlaying]);
- return (
+
+    useEffect(() => {
+        if (partyId) {
+            fetchQueue();
+        }
+    }, [partyId, fetchQueue]);
+
+    return (
         <div className="App">
             <header className="party-header">
-                <h1>Party Planner</h1>
+                <h1>Party Guest Page</h1>
                 <div className="controls">
                     <div className="time-picker">
                         <input type="time" defaultValue="19:00" />
                     </div>
                     <button className="action-button" onClick={toggleQueue}>Show Queue</button>
-                    <button className="action-button" onClick={navigateToDJPage}>Go to DJ Page</button>
                     <button className="party-control-button" onClick={handlePlayPause}>
                         {isPlaying ? 'Pause Music' : 'Play Music'}
                     </button>
@@ -323,7 +253,7 @@ const PartyPage = () => {
             {showQueue && (
                 <div className="queue-list">
                     <h2>Songs in Queue</h2>
-                    {queue.map((song, index) => (
+                    {Array.isArray(queue) && queue.map((song, index) => (
                         <div key={index} className="queue-item">{song.title} - by {song.artist}</div>
                     ))}
                 </div>
@@ -334,7 +264,6 @@ const PartyPage = () => {
                 {guests.map((guest, index) => (
                     <div key={index} className="guest-item">
                         {guest}
-                        <button className="action-button" onClick={() => handleRemoveGuest(index)}>-</button>
                     </div>
                 ))}
                 <input
@@ -345,9 +274,6 @@ const PartyPage = () => {
                     className="party-input"
                 />
                 <button className="action-button" onClick={handleAddGuest}>+</button>
-                {location.pathname === "/party/default" && (
-                    <button className="create-party-button" onClick={handleCreateParty}>Create Party</button>
-                )}
             </div>
             <div className="playlist-container">
                 <h2>Playlist</h2>
@@ -377,9 +303,8 @@ const PartyPage = () => {
                     {isPlaying ? 'Pause Music' : 'Play Music'}
                 </button>
             </div>
-            <button className="party-control-button" onClick={handleDeleteParty}>Delete Party</button>
         </div>
     );
 };
 
-export default PartyPage;
+export default UserPagePlay;

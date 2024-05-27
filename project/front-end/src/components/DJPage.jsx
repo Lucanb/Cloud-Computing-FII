@@ -1,25 +1,33 @@
-// DJPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import './DJPage.css';
 
 const DJPage = () => {
-    const location = useLocation();
     const navigate = useNavigate();
-
-    // Retrieve proposed songs passed from PartyPage or use default list
-    const initialProposedSongs = location.state?.proposedSongs || [];
-    const [proposedSongs, setProposedSongs] = useState(initialProposedSongs);
+    const { partyId } = useParams();
+    const [proposedSongs, setProposedSongs] = useState([]);
     const [selectedSongs, setSelectedSongs] = useState([]);
     const [remixUrl, setRemixUrl] = useState("");
 
     useEffect(() => {
-        console.log('Proposed Songs:', proposedSongs); // Log to verify proposed songs
-    }, [proposedSongs]);
+        const fetchSongs = async () => {
+            try {
+                const response = await fetch(`https://party-functions-luca.azurewebsites.net/api/party/get-all-songs?partyId=${partyId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch songs');
+                }
+                const data = await response.json();
+                setProposedSongs(data);
+            } catch (error) {
+                console.error('Error fetching songs:', error);
+            }
+        };
+
+        fetchSongs();
+    }, [partyId]);
 
     const handleAddSong = (song) => {
         setSelectedSongs([...selectedSongs, song]);
-        console.log(JSON.stringify(song));
     };
 
     const handleRemoveSong = (song) => {

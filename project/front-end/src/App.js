@@ -14,6 +14,7 @@ import ArtistPage from "./pages/ArtistPage";
 import NewsComponent from "./components/NewsComponent";
 import GalleryComponent from './components/GalleryComponent';
 import PartyPage from './pages/PartyPage';
+import UserPagePlay from './pages/UserPagePlay';
 import DJPage from './components/DJPage'
 import MessagingPage from './pages/MessagingPage';
 
@@ -51,6 +52,7 @@ function App() {
                         <Route exact path="/signup" element={<SignUp />} />
                         <Route path="/home" element={<Protected><Home /></Protected>} />
                         <Route exact path="/party/:id" element={<Protected>< PartyPage/></Protected>} />
+                        <Route exact path="/userPage/:idParty/:id_user" element={<Protected>< UserPagePlay/></Protected>} />
                         {/*<Route exact path="/home" element={<Home />} />*/}
                         <Route exact path="/music/:id" element={<Protected><MusicPage /></Protected>} />
                         <Route exact path="/artist/:id" element={<Protected><ArtistPage /></Protected>} />
