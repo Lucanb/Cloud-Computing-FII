@@ -211,3 +211,28 @@ app.http('songs-getOne-aferUser', {
         }
     }
 });
+
+async function getPartiesByAdminId(adminId) {
+    const db = await connectToDatabase();
+    const parties = await db.collection("party").find({ admin: adminId }).toArray();
+    return parties;
+}
+
+
+app.http('get-parties-by-admin-id', {
+    methods: ['GET'],
+    route: 'party/get-parties-by-admin-id',
+    handler: async (request, context) => {
+        const adminId = request.query.get('adminId');
+        if (!adminId) {
+            return { status: 400, body: JSON.stringify({ message: "Admin ID is required" }) };
+        }
+        try {
+            const parties = await getPartiesByAdminId(adminId);
+            return { status: 200, body: JSON.stringify(parties) };
+        } catch (error) {
+            console.error("Error fetching parties by admin ID:", error);
+            return { status: 500, body: JSON.stringify({ message: "Internal Server Error", error: error.message }) };
+        }
+    }
+});
