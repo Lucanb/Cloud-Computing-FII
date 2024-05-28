@@ -23,7 +23,6 @@ async function connectToDatabase() {
     }
 }
 
-
 app.http('generate-music', {
     methods: ['POST'],
     authLevel: 'anonymous',
@@ -53,9 +52,8 @@ app.http('generate-music', {
                         const selectedMixes = [];
 
                         for (const match of matches) {
-                            const blobName = match.link.split('/').pop();
-                            const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-                            selectedMixes.push(blockBlobClient.url);
+                            const blobName = decodeURIComponent(match.link.split('/').pop().split('?')[0]);
+                            selectedMixes.push(`https://musicappluca.blob.core.windows.net/remix/${blobName}`);
                         }
 
                         console.log('Selected mixes:', selectedMixes);
@@ -75,9 +73,8 @@ app.http('generate-music', {
                                 const selectedBackupMixes = [];
 
                                 for (const match of backupMatches) {
-                                    const blobName = match.link.split('/').pop();
-                                    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-                                    selectedBackupMixes.push(blockBlobClient.url);
+                                    const blobName = decodeURIComponent(match.link.split('/').pop().split('?')[0]);
+                                    selectedBackupMixes.push(`https://musicappluca.blob.core.windows.net/remix/${blobName}`);
                                 }
 
                                 console.log('Selected backup mixes:', selectedBackupMixes);
