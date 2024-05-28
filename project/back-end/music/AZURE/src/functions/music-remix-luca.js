@@ -63,7 +63,6 @@ app.http('generate-music', {
                             body: JSON.stringify({ urls: selectedMixes })
                         });
                     } else {
-                        // Dacă nu găsim potriviri exacte, căutăm în funcție de lungimea titlului și numele artistului
                         const allRemixes = await db.collection("remixes").find({}).toArray();
                         const allRemixLinks = allRemixes.map(remix => remix.link);
                         const allRemixPlaylist = allRemixes.map(remix => [remix.link, remix.songName, remix.artistName]);
