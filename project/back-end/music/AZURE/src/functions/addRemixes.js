@@ -49,7 +49,6 @@ app.http('save-remix', {
 
         await createContainerIfNotExists();
 
-        // Upload the file to Azure Blob Storage
         const blobName = path.basename(filePath);
         const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
@@ -58,7 +57,6 @@ app.http('save-remix', {
             await blockBlobClient.uploadData(fileData);
             console.log(`File uploaded to Blob Storage: ${blobName}`);
 
-            // Save metadata to Cosmos DB
             const remixData = {
                 link: blockBlobClient.url,
                 artistName,

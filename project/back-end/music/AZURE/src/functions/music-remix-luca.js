@@ -32,18 +32,15 @@ app.http('generate-music', {
         const { playlist } = JSON.parse(await request.text());
         console.log('Received playlist:', playlist);
 
-        // Extragem numele melodiilor și numele artiștilor din playlist pentru a le folosi ca searchWords
         const searchWords = playlist.map(item => item.title);
         const searchArtists = playlist.map(item => item.artist);
 
         try {
-            // Obținem remixuri din baza de date
             const remixes = await db.collection("remixes").find({ songName: { $in: searchWords } }).toArray();
             console.log('Remixes found:', remixes);
 
             const remixLinks = remixes.map(remix => remix.link);
 
-            // Formăm un playlist cu link-uri, nume și artiști
             const remixPlaylist = remixes.map(remix => [remix.link, remix.songName, remix.artistName]);
 
             return new Promise((resolve, reject) => {

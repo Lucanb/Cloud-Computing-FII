@@ -25,7 +25,7 @@ function findMatchingSongs(playlist, searchWords, searchArtists, callback) {
 
             if (lowerTitle.includes(wordLower) || lowerArtist.includes(wordLower)) {
                 matchCount++;
-                minDistance = Math.min(minDistance, 0); // potrivire exactă
+                minDistance = Math.min(minDistance, 0);
             } else if (titleDistance <= 3 || artistDistance <= 3) {
                 matchCount++;
                 minDistance = Math.min(minDistance, titleDistance, artistDistance);
