@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import './HomePage.css';
 import Button from "@mui/material/Button";
 import SearchBar from "../components/SearchBar";
@@ -13,19 +13,52 @@ const Home = () => {
     const user = useContext(AuthContext);
     const navigate = useNavigate();
 
-    console.log("Music page:", user);
-    
     const [isAddArtistModalOpen, setIsAddArtistModalOpen] = useState(false);
     const [isAddAlbumModalOpen, setIsAddAlbumModalOpen] = useState(false);
     const [isAddImageModalOpen, setIsAddImageModalOpen] = useState(false);
     const [showPartyNav, setShowPartyNav] = useState(false);
+    const [showPartyInvites, setShowPartyInvites] = useState(false);
+    const [parties, setParties] = useState([]);
+    const [invites, setInvites] = useState([]);
     const [setResults] = useState([]);
 
-    console.log('user', user);
-    
     const apiUrlArtists = `https://music-app-luca.azurewebsites.net/api/artists/getAll/${user.uid}`;
     const apiUrlAlbums = `https://music-app-luca.azurewebsites.net/api/albums/getAll/${user.uid}`;
     const isAuthenticated = useContext(AuthContext);
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchParties();
+            fetchInvites();
+        }
+    }, [isAuthenticated]);
+
+    const fetchParties = async () => {
+        try {
+            const response = await fetch(`https://party-functions-luca.azurewebsites.net/api/party/get-parties-by-admin-id/?adminId=${user.uid}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch parties');
+            }
+            const data = await response.json();
+            setParties(data);
+        } catch (error) {
+            console.error('Error fetching parties:', error);
+        }
+    };
+
+    const fetchInvites = async () => {
+        try {
+            const response = await fetch(`https://party-functions-luca.azurewebsites.net/api/party/get-parties-by-guest-id/?guestId=${user.uid}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch invites');
+            }
+            const data = await response.json();
+            setInvites(data);
+            console.log("Party invites:", invites)
+        } catch (error) {
+            console.error('Error fetching invites:', error);
+        }
+    };
 
     const handleSearchResults = (searchResults) => {
         setResults(searchResults);
@@ -51,19 +84,40 @@ const Home = () => {
         setShowPartyNav(!showPartyNav);
     };
 
-    const parties = [
-        { id: 1, name: 'Party 1' },
-        { id: 2, name: 'Party 2' },
-        { id: 3, name: 'Party 3' },
-        { id: 4, name: 'Party 4' },
-        { id: 5, name: 'Party 5' },
-        { id: 6, name: 'Party 6' },
-        { id: 7, name: 'Party 7' },
-        { id: 8, name: 'Party 8' },
-        { id: 9, name: 'Party 9' },
-        { id: 10, name: 'Party 10' },
-        { id: 11, name: 'Party 11' }
-    ];
+    const togglePartyInvites = () => {
+        setShowPartyInvites(!showPartyInvites);
+    };
+
+    const renderPartyButtons = (parties) => {
+        return (
+            <div className="party-nav-buttons">
+                {parties.map(party => (
+                    <button
+                        key={party._id}
+                        className="party-nav-button"
+                        onClick={() => navigate(`/party/${party._id}`)}
+                    >
+                        Party {party._id}
+                    </button>
+                ))}
+            </div>
+        );
+    };
+    const renderPartyInviteButtons = (parties) => {
+        return (
+            <div className="party-nav-buttons">
+                {parties.map(party => (
+                    <button
+                        key={party._id}
+                        className="party-nav-button"
+                        onClick={() => navigate(`/userPage/${party._id}`)}
+                    >
+                        Party {party._id}
+                    </button>
+                ))}
+            </div>
+        );
+    };
 
     return (
         <div className="home-container">
@@ -75,6 +129,7 @@ const Home = () => {
                         <Button color="inherit" onClick={openAddArtistModal}>Add Artist</Button>
                         <Button color="inherit" onClick={openAddAlbumModal}>Add Album</Button>
                         <Button color="inherit" onClick={togglePartyNav}>Show Parties</Button>
+                        <Button color="inherit" onClick={togglePartyInvites}>Show Party Invites</Button>
                         <Button color="inherit" onClick={handleSeeMessages}>See Your Messages</Button>
                     </div>
                     {isAddArtistModalOpen && <AddArtistModal onClose={() => setIsAddArtistModalOpen(false)} />}
@@ -90,17 +145,13 @@ const Home = () => {
             {showPartyNav && (
                 <div className="party-nav">
                     <h2>My Parties</h2>
-                    <div className="party-nav-buttons">
-                        {parties.map(party => (
-                            <button
-                                key={party.id}
-                                className="party-nav-button"
-                                onClick={() => navigate(`/party/${party.id}`)}
-                            >
-                                {party.name}
-                            </button>
-                        ))}
-                    </div>
+                    {renderPartyButtons(parties)}
+                </div>
+            )}
+            {showPartyInvites && (
+                <div className="party-nav">
+                    <h2>Party Invites</h2>
+                    {renderPartyInviteButtons(invites)}
                 </div>
             )}
         </div>

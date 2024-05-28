@@ -19,19 +19,12 @@ const PartyPage = () => {
 
     const location = useLocation();
     const navigate = useNavigate();
-    const currentPath = location.pathname;
     const userId = user?.uid;
 
     useEffect(() => {
-        const currentPath = location.pathname;
-        const possibleId = currentPath.split("/")[2];
-
-        if (possibleId !== "default") {
-            setPartyId(possibleId);
-        } else {
-            setPartyId(null); // Reset partyId if the path is default
-        }
-    }, [location.pathname, user]);
+        const possibleId = location.pathname.split("/")[2];
+        setPartyId(possibleId !== "default" ? possibleId : null);
+    }, [location.pathname]);
 
     useEffect(() => {
         if (user) {
@@ -196,15 +189,20 @@ const PartyPage = () => {
         const audio = audioRef.current;
         if (!audio) return;
 
-        if (isPlaying) {
-            audio.pause();
+        if (!currentSong && queue.length > 0) {
+            setCurrentSong(queue[0]);
+            setIsPlaying(true);
         } else {
-            audio.play().catch(error => {
-                console.error('Error playing audio:', error);
-                setIsPlaying(false);
-            });
+            if (isPlaying) {
+                audio.pause();
+            } else {
+                audio.play().catch(error => {
+                    console.error('Error playing audio:', error);
+                    setIsPlaying(false);
+                });
+            }
+            setIsPlaying(!isPlaying);
         }
-        setIsPlaying(!isPlaying);
     };
 
     const navigateToDJPage = () => {
@@ -217,15 +215,35 @@ const PartyPage = () => {
 
     const handleAddGuest = async () => {
         if (newGuest) {
-            const guestId = await fetchGuestId(newGuest);
-            if (guestId) {
-                setGuests([...guests, guestId]);
-                setNewGuest("");
-            } else {
-                alert(`Failed to add guest with email: ${newGuest}`);
+            try {
+                const guestId = await fetchGuestId(newGuest);
+                if (guestId) {
+                    setGuests([...guests, newGuest]);
+    
+                    const response = await fetch('https://party-functions-luca.azurewebsites.net/api/party/update-guest-list', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ partyId, guestId, add: true }),
+                    });
+    
+                    if (!response.ok) {
+                        const errorResponse = await response.json();
+                        throw new Error(errorResponse.message || 'Network response was not ok');
+                    }
+    
+                    setNewGuest("");
+                } else {
+                    alert(`Failed to add guest with email: ${newGuest}`);
+                }
+            } catch (error) {
+                console.error('Error adding guest:', error);
+                alert(`Failed to add guest: ${error.message}`);
             }
         }
     };
+    
 
     const handleRemoveGuest = async (index) => {
         const guestToRemove = guests[index];
