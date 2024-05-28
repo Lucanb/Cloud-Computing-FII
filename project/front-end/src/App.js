@@ -52,10 +52,11 @@ function App() {
                         <Route exact path="/signup" element={<SignUp />} />
                         <Route path="/home" element={<Protected><Home /></Protected>} />
                         <Route exact path="/party/:id" element={<Protected>< PartyPage/></Protected>} />
-                        <Route exact path="/userPage/:idParty/:id_user" element={<Protected>< UserPagePlay/></Protected>} />
+                        <Route exact path="/userPage/:idParty" element={<Protected>< UserPagePlay/></Protected>} />
                         {/*<Route exact path="/home" element={<Home />} />*/}
                         <Route exact path="/music/:id" element={<Protected><MusicPage /></Protected>} />
                         <Route exact path="/artist/:id" element={<Protected><ArtistPage /></Protected>} />
+
                         <Route path="/party-dj/:id" element={<Protected><DJPage /></Protected>} />
                         <Route exact path="/news" element={<Protected><NewsComponent /></Protected>} />
                         <Route exact path="/gallery" element={<Protected><GalleryComponent /></Protected>} />
@@ -67,4 +68,4 @@ function App() {
     );
 }
 
-export default App; 
+export default App;

@@ -15,12 +15,23 @@ const PartyPage = () => {
     const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef(null);
     const user = useContext(AuthContext);
+    const [partyId, setPartyId] = useState(null);
 
     const location = useLocation();
     const navigate = useNavigate();
     const currentPath = location.pathname;
-    const partyId = currentPath.split("/")[2];
     const userId = user?.uid;
+
+    useEffect(() => {
+        const currentPath = location.pathname;
+        const possibleId = currentPath.split("/")[2];
+
+        if (possibleId !== "default") {
+            setPartyId(possibleId);
+        } else {
+            setPartyId(null); // Reset partyId if the path is default
+        }
+    }, [location.pathname, user]);
 
     useEffect(() => {
         if (user) {
@@ -52,24 +63,32 @@ const PartyPage = () => {
 
     const fetchPartyDetails = async (partyId) => {
         try {
-            const playlistResponse = await fetch(`https://party-functions-luca.azurewebsites.net/api/party/get-all-songs/${partyId}`);
-            if (!playlistResponse.ok) {
+            const partyResponse = await fetch(`https://party-functions-luca.azurewebsites.net/api/party/get-party-by-id/?partyId=${partyId}`);
+            if (!partyResponse.ok) {
                 throw new Error('Failed to fetch playlist');
             }
-            const playlistData = await playlistResponse.json();
-            console.log('Fetched playlist data:', playlistData);
+            const partyData = await partyResponse.json();
+            const playlistData = partyData.playlist;
+            const guestsData = partyData.guests;
+            console.log('Fetched playlist data:', partyData);
 
-            const detailedSongs = playlistData.map(songId => {
-                const foundSong = existingSongs.find(song => song._id === songId);
-                if (!foundSong) {
-                    console.warn(`Song with ID ${songId} not found in existing songs`);
+            const detailedSongs = await Promise.all(playlistData.map(async songId => {
+                try {
+                    const songResponse = await fetch(`https://party-functions-luca.azurewebsites.net/api/songs/getById/${songId}`);
+                    if (!songResponse.ok) {
+                        console.warn(`Song with ID ${songId} not found in existing songs`);
+                        return undefined;
+                    }
+                    return await songResponse.json();
+                } catch (error) {
+                    console.warn(`Error fetching song with ID ${songId}:`, error);
+                    return undefined;
                 }
-                return foundSong;
-            }).filter(song => song !== undefined);
+            }));
 
             console.log('Detailed songs:', detailedSongs);
-            setSongs(detailedSongs);
-            setQueue(detailedSongs); // Set all songs to queue
+            setGuests(guestsData);
+            setQueue(detailedSongs.filter(song => song !== undefined)); // Filter out undefined songs
         } catch (error) {
             console.error('Error fetching party details:', error);
         }
@@ -100,7 +119,7 @@ const PartyPage = () => {
 
             await updateGuestList(partyData.id, guests);
 
-            for (const song of songs) {
+            for (const song of queue) {
                 await updatePlaylist(partyData.id, song._id, true);
             }
 
@@ -112,23 +131,39 @@ const PartyPage = () => {
         }
     };
 
+    const fetchGuestId = async (email) => {
+        try {
+            const response = await fetch(`https://user-function-luca.azurewebsites.net/api/getIdAfterEmail/${email}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch guest ID for email: ${email}`);
+            }
+            const data = await response.json();
+            return data.id;
+        } catch (error) {
+            console.error('Error fetching guest ID:', error);
+            return null;
+        }
+    };
+
     const updateGuestList = async (partyId, guests) => {
         try {
             for (const guest of guests) {
-                const response = await fetch('https://party-functions-luca.azurewebsites.net/api/party/update-guest-list', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ partyId, guestId: guest, add: true }),
-                });
+                const guestId = await fetchGuestId(guest);
+                if (guestId) {
+                    const response = await fetch('https://party-functions-luca.azurewebsites.net/api/party/update-guest-list', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ partyId, guestId, add: true }),
+                    });
 
-                if (!response.ok) {
-                    const errorResponse = await response.json();
-                    throw new Error(errorResponse.message || 'Network response was not ok');
+                    if (!response.ok) {
+                        const errorResponse = await response.json();
+                        throw new Error(errorResponse.message || 'Network response was not ok');
+                    }
                 }
             }
-
         } catch (error) {
             console.error('Error updating guest list:', error);
             alert(`Failed to update guest list: ${error.message}`);
@@ -180,10 +215,15 @@ const PartyPage = () => {
         }
     };
 
-    const handleAddGuest = () => {
+    const handleAddGuest = async () => {
         if (newGuest) {
-            setGuests([...guests, newGuest]);
-            setNewGuest("");
+            const guestId = await fetchGuestId(newGuest);
+            if (guestId) {
+                setGuests([...guests, guestId]);
+                setNewGuest("");
+            } else {
+                alert(`Failed to add guest with email: ${newGuest}`);
+            }
         }
     };
 
@@ -221,7 +261,6 @@ const PartyPage = () => {
                         const response = await updatePlaylist(partyId, selectedSong, true);
                         if (response.ok) {
                             setSongs(prevSongs => [...prevSongs, song]);
-                            setQueue(prevQueue => [...prevQueue, song]);
                         } else {
                             console.error('Failed to add song to playlist:', response.statusText);
                             alert('Failed to add song to the playlist');

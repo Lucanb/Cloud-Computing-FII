@@ -1,30 +1,64 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import './DJPage.css';
+import { AuthContext } from "../middleware";
 
 const DJPage = () => {
-    const navigate = useNavigate();
-    const { partyId } = useParams();
     const [proposedSongs, setProposedSongs] = useState([]);
     const [selectedSongs, setSelectedSongs] = useState([]);
     const [remixUrl, setRemixUrl] = useState("");
+    const [partyId, setPartyId] = useState(null);
+    const user = useContext(AuthContext);
+
+    const location = useLocation();
+    const navigate = useNavigate();
+    const currentPath = location.pathname;
+    const userId = user?.uid;
+
+    useEffect(() => {
+        const currentPath = location.pathname;
+        const possibleId = currentPath.split("/")[2];
+
+        if (possibleId !== "default") {
+            setPartyId(possibleId);
+        } else {
+            setPartyId(null);
+        }
+    }, [location.pathname, user]);
 
     useEffect(() => {
         const fetchSongs = async () => {
             try {
-                const response = await fetch(`https://party-functions-luca.azurewebsites.net/api/party/get-all-songs?partyId=${partyId}`);
+                const response = await fetch(`https://party-functions-luca.azurewebsites.net/api/party/get-all-songs/${partyId}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch songs');
                 }
                 const data = await response.json();
-                setProposedSongs(data);
+                console.log(data);
+    
+                const detailedSongs = await Promise.all(data.map(async songId => {
+                    try {
+                        const songResponse = await fetch(`https://party-functions-luca.azurewebsites.net/api/songs/getById/${songId}`);
+                        if (!songResponse.ok) {
+                            console.warn(`Song with ID ${songId} not found in existing songs`);
+                            return undefined;
+                        }
+                        return await songResponse.json();
+                    } catch (error) {
+                        console.warn(`Error fetching song with ID ${songId}:`, error);
+                        return undefined;
+                    }
+                }));
+    
+                setProposedSongs(detailedSongs.filter(song => song !== undefined));
             } catch (error) {
                 console.error('Error fetching songs:', error);
             }
         };
-
+    
         fetchSongs();
     }, [partyId]);
+    
 
     const handleAddSong = (song) => {
         setSelectedSongs([...selectedSongs, song]);
@@ -77,9 +111,10 @@ const DJPage = () => {
                     {proposedSongs.map((song, index) => (
                         <div key={index} className="song-item">
                             {song.title} - {song.artist}
+                            <div className='plus'>
                             <button onClick={() => handleAddSong(song)}>+</button>
                             <button onClick={() => handleRemoveSong(song)}>-</button>
-                        </div>
+                        </div></div>
                     ))}
                 </div>
             </div>

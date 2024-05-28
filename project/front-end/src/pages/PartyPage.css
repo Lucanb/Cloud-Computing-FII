@@ -47,9 +47,10 @@
   
   .guest-item, .song-item, .queue-item {
     margin: 10px;
-    color: #61dafb;
+    color: #1c89a8;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     width: 100%;
   }
   

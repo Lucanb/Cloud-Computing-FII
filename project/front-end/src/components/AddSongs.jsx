@@ -3,14 +3,10 @@ import { AuthContext } from "../middleware";
 import { BlobServiceClient } from "@azure/storage-blob";
 import './Forms.css';
 
-const AddSongModal = ({ isOpen, onClose }) => {
+const AddSongModal = ({ isOpen, onClose, onSongAdded }) => {
     const user = useContext(AuthContext);
     const [songData, setSongData] = useState({
         title: "",
-        artist: "",
-        album: "",
-        releaseDate: "",
-        duration: "",
     });
     const [file, setFile] = useState(null);
     const [uploading, setUploading] = useState(false);
@@ -58,7 +54,7 @@ const AddSongModal = ({ isOpen, onClose }) => {
                 body: JSON.stringify({ blobUrl }),
             });
             const result = await response.json();
-            console.log('verif results : ',result)
+            console.log('verif results : ', result);
             return result;
         } catch (error) {
             console.error('Error verifying copyright:', error);
@@ -78,45 +74,23 @@ const AddSongModal = ({ isOpen, onClose }) => {
         const verificationResult = await verifyCopyright(fileUrl);
         if (verificationResult.isProtected) {
             setVerificationMessage(verificationResult.message);
-            console.log('Results : ',verificationResult)
-            console.log('Ress mesasge : ',verificationResult.message)
+            console.log('Results : ', verificationResult);
+            console.log('Ress mesasge : ', verificationResult.message);
             return;
         }
 
-        const songDataWithLink = {
+        const newSong = {
             ...songData,
             link: fileUrl,
         };
 
-        try {
-            const response = await fetch(`https://music-app-luca.azurewebsites.net/api/songs/save/${user.uid}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(songDataWithLink),
-            });
-            console.log(response);
-            console.log(songDataWithLink);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+        onSongAdded(newSong);
 
-            setSongData({
-                title: "",
-                artist: "",
-                album: "",
-                releaseDate: "",
-                duration: "",
-            });
-            setFile(null);
-            setVerificationMessage('');
+        setSongData({ title: "" });
+        setFile(null);
+        setVerificationMessage('');
 
-            onClose();
-            window.location.reload();
-        } catch (error) {
-            console.error('Error adding song:', error);
-        }
+        onClose();
     };
 
     return (
@@ -138,42 +112,6 @@ const AddSongModal = ({ isOpen, onClose }) => {
                                 onChange={handleChange}
                                 required
                                 placeholder="Title"
-                            />
-                            <input
-                                type="text"
-                                id="artist"
-                                name="artist"
-                                value={songData.artist}
-                                onChange={handleChange}
-                                required
-                                placeholder="Artist"
-                            />
-                            <input
-                                type="text"
-                                id="album"
-                                name="album"
-                                value={songData.album}
-                                onChange={handleChange}
-                                required
-                                placeholder="Album"
-                            />
-                            <input
-                                type="date"
-                                id="releaseDate"
-                                name="releaseDate"
-                                value={songData.releaseDate}
-                                onChange={handleChange}
-                                required
-                                placeholder="Release Date"
-                            />
-                            <input
-                                type="text"
-                                id="duration"
-                                name="duration"
-                                value={songData.duration}
-                                onChange={handleChange}
-                                required
-                                placeholder="Duration"
                             />
                             <input
                                 type="file"

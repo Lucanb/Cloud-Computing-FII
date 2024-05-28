@@ -1,51 +1,42 @@
 import React, { useState, useEffect, useContext } from "react";
-import { audios } from "../audios/audioData";
 import MusicPlayer from "../components/musicPlayer";
 import Player from "../components/musicContainer";
 import ReactPaginate from 'react-paginate';
 import { useParams } from 'react-router-dom';
 import AddSongModal from "../components/AddSongs";
 import { AuthContext } from "../middleware";
+
 const MusicPage = () => {
     const user = useContext(AuthContext);
-    console.log("Music page:",user);
-    let { id } = useParams(); // Accesează ID-ul din obiectul params
+    console.log("Music page:", user);
+    let { id } = useParams();
     id = id.replace(":", "");
 
-    // const [songs, setSongs] = useState(audios);
-    const [songs, setSongs] = useState([]);////////////////////////////
+    const [songs, setSongs] = useState([]);
     const [album, setAlbum] = useState({});
     const [currentSong, setCurrentSong] = useState({});
     const [pageNumber, setPageNumber] = useState(0);
     const [currentIndex, setCurrentIndex] = useState(null);
     const [isAddSongModalOpen, setIsAddSongModalOpen] = useState(false);
     const songsPerPage = 6;
-
-    // Calculează înălțimea ecranului pentru a seta înălțimea maximă a containerului de paginare
     const [windowHeight, setWindowHeight] = useState(window.innerHeight);
 
-    // Funcție pentru actualizarea înălțimii ecranului
     const handleResize = () => {
         setWindowHeight(window.innerHeight);
     };
 
-    // Adaugă un eveniment de ascultare pentru redimensionarea ferestrei
     const fetchAlbumData = async () => {
         try {
-            // console.log('id :',id)
             const response = await fetch(`https://music-app-luca.azurewebsites.net/api/albums/getOne/${id}/${user.uid}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
-
-            console.log('data : ',data)
-            const fetchedAlbum = data; // Salvează datele albumului din răspunsul API
-            // console.log(fetchedAlbum)
+            const fetchedAlbum = data;
             if (fetchedAlbum && fetchedAlbum._id) {
-                setAlbum(data); // Setează datele albumului
-             } else {
-                  throw new Error('Album data is not valid');
+                setAlbum(data);
+            } else {
+                throw new Error('Album data is not valid');
             }
         } catch (error) {
             console.error('Error fetching album data:', error);
@@ -55,7 +46,6 @@ const MusicPage = () => {
     const fetchSongsByAlbum = async () => {
         try {
             const response = await fetch(`https://music-app-luca.azurewebsites.net/api/songs/getSongsByAlbum/${encodeURIComponent(album.title)}/${user.uid}`);
-            console.log('data response: ',response)
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -65,7 +55,6 @@ const MusicPage = () => {
             console.error('Error fetching songs by album:', error);
         }
     };
-    
 
     useEffect(() => {
         fetchAlbumData();
@@ -82,9 +71,6 @@ const MusicPage = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Calculează înălțimea maximă a containerului de paginare
-    const paginationMaxHeight = windowHeight / 5;
-
     const getSongsData = (song, index) => {
         setCurrentSong(song);
         setCurrentIndex(index);
@@ -97,13 +83,24 @@ const MusicPage = () => {
     const changePage = ({ selected }) => {
         setPageNumber(selected);
     };
+
     const openAddSongModal = () => {
         setIsAddSongModalOpen(true);
     };
+
+    const handleSongAdded = (newSong) => {
+        newSong.artist = album.artist;
+        newSong.album = album.title || "Unknown Album";
+        newSong.releaseDate = new Date().toISOString().split('T')[0];
+        newSong.duration = "Unknown Duration";
+
+        setSongs([...songs, newSong]);
+    };
+
     return (
         <div>
             <div className="add-song-button" onClick={openAddSongModal}>Add Song</div>
-            <AddSongModal isOpen={isAddSongModalOpen} onClose={() => setIsAddSongModalOpen(false)} />
+            <AddSongModal isOpen={isAddSongModalOpen} onClose={() => setIsAddSongModalOpen(false)} onSongAdded={handleSongAdded} />
             <div className={"player-main"}>
                 <MusicPlayer
                     currentSong={currentSong}
@@ -112,11 +109,10 @@ const MusicPage = () => {
                     setSongs={setSongs}
                 />
             </div>
-            <div className="pagination-container"
-                 style={{maxHeight: paginationMaxHeight}}> {/* Adaugă un container pentru paginare */}
+            <div className="pagination-container" style={{ maxHeight: windowHeight / 5 }}>
                 <div className="music-play-container">
                     {currentSongs.map((song, index) => (
-                        <Player key={index} song={song} getSongsData={getSongsData} index={index}/>
+                        <Player key={index} song={song} getSongsData={getSongsData} index={index} />
                     ))}
                     <ReactPaginate
                         pageCount={Math.ceil(songs.length / songsPerPage)}

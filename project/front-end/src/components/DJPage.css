@@ -27,3 +27,9 @@
 .action-button:hover {
     background-color: #0056b3;
 }
+
+.plus button{
+    margin: 10px;
+    height: 30px;
+    width: 30px;
+}
