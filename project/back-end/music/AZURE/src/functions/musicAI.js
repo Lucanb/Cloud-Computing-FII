@@ -26,7 +26,7 @@ function findMatchingSongs(playlist, searchWords, searchArtists, callback) {
             if (lowerTitle.includes(wordLower) || lowerArtist.includes(wordLower)) {
                 matchCount++;
                 minDistance = Math.min(minDistance, 0); // potrivire exactă
-            } else if (titleDistance <= 3 || artistDistance <= 3) { // ajustați pragul după necesități
+            } else if (titleDistance <= 3 || artistDistance <= 3) {
                 matchCount++;
                 minDistance = Math.min(minDistance, titleDistance, artistDistance);
             }
@@ -38,7 +38,6 @@ function findMatchingSongs(playlist, searchWords, searchArtists, callback) {
         }
     });
 
-    // Dacă nu găsim niciun cuvânt, căutăm în funcție de lungimea titlului și numele artistului
     if (matches.length === 0) {
         playlist.forEach(item => {
             const [link, title, artist] = item;
@@ -56,10 +55,7 @@ function findMatchingSongs(playlist, searchWords, searchArtists, callback) {
             matches.push({ link: link, title: title, artist: artist, distance: minDistance, matchRatio: 0 });
         });
 
-        // Sortăm melodiile după distanța Levenshtein (cea mai mică distanță = cea mai bună potrivire)
         matches.sort((a, b) => a.distance - b.distance);
-
-        // Grupăm melodiile după distanță și amestecăm fiecare grup
         let groupedMatches = matches.reduce((acc, song) => {
             acc[song.distance] = acc[song.distance] || [];
             acc[song.distance].push(song);
@@ -73,7 +69,6 @@ function findMatchingSongs(playlist, searchWords, searchArtists, callback) {
 
         callback(sortedAndShuffledMatches.length > 0 ? sortedAndShuffledMatches : null);
     } else {
-        // Sortăm melodiile după raportul de potrivire și apoi după distanța Levenshtein (cea mai mică distanță = cea mai bună potrivire)
         matches.sort((a, b) => {
             if (b.matchRatio === a.matchRatio) {
                 return a.distance - b.distance;
@@ -81,7 +76,6 @@ function findMatchingSongs(playlist, searchWords, searchArtists, callback) {
             return b.matchRatio - a.matchRatio;
         });
 
-        // Grupăm melodiile după distanță și amestecăm fiecare grup
         let groupedMatches = matches.reduce((acc, song) => {
             acc[song.distance] = acc[song.distance] || [];
             acc[song.distance].push(song);
