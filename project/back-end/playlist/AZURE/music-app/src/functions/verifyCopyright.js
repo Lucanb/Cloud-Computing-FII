@@ -49,11 +49,10 @@ app.http('verify-copyright', {
                         .on('end', () => {
                             fs.readFile(outputFilePath, (err, data) => {
                                 if (err) {
-                                    context.res = {
+                                    return resolve({
                                         status: 500,
-                                        body: 'Error reading segment file.'
-                                    };
-                                    return reject('Error reading segment file.');
+                                        body: JSON.stringify({ error: 'Error reading segment file.' })
+                                    });
                                 }
 
                                 acrcloudClient.identify(data)
@@ -63,12 +62,10 @@ app.http('verify-copyright', {
 
                                         let isProtected = false;
 
-                                        // Check music section
                                         if (result.status.code === 0 && result.metadata && result.metadata.music && result.metadata.music.length > 0) {
                                             isProtected = true;
                                         }
 
-                                        // Check humming section
                                         if (result.metadata && result.metadata.humming && result.metadata.humming.length > 0) {
                                             result.metadata.humming.forEach(hummingResult => {
                                                 if (hummingResult.score >= 0.6) {
@@ -81,41 +78,38 @@ app.http('verify-copyright', {
                                         fs.unlink(outputFilePath, () => {});
 
                                         if (isProtected) {
-                                            context.res = {
+                                            return resolve({
                                                 status: 200,
-                                                body: { isProtected: true, message: 'The uploaded file is protected by copyright.' }
-                                            };
+                                                body: JSON.stringify({ isProtected: true, message: 'The uploaded file is protected by copyright.' })
+                                            });
                                         } else {
-                                            context.res = {
+                                            return resolve({
                                                 status: 200,
-                                                body: { isProtected: false, message: 'No matching content found.' }
-                                            };
+                                                body: JSON.stringify({ isProtected: false, message: 'No matching content found.' })
+                                            });
                                         }
-                                        resolve();
                                     })
                                     .catch(err => {
-                                        context.res = {
+                                        return resolve({
                                             status: 500,
-                                            body: 'Error identifying audio: ' + err
-                                        };
-                                        reject('Error identifying audio: ' + err);
+                                            body: JSON.stringify({ error: 'Error identifying audio: ' + err })
+                                        });
                                     });
                             });
                         })
                         .on('error', (err) => {
-                            context.res = {
+                            return resolve({
                                 status: 500,
-                                body: 'Error extracting segment: ' + err
-                            };
-                            reject('Error extracting segment: ' + err);
+                                body: JSON.stringify({ error: 'Error extracting segment: ' + err })
+                            });
                         })
                         .run();
                 });
             });
         } catch (error) {
-            context.res = {
+            return {
                 status: 500,
-                body: 'Error processing audio: ' + error
+                body: JSON.stringify({ error: 'Error processing audio: ' + error })
             };
         }
     }

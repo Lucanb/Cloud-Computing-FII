@@ -77,20 +77,21 @@ const AddSongModal = ({ isOpen, onClose, onSongAdded }) => {
             console.log('Results : ', verificationResult);
             console.log('Ress mesasge : ', verificationResult.message);
             return;
+            }else{
+
+            const newSong = {
+                ...songData,
+                link: fileUrl,
+            };
+
+            onSongAdded(newSong);
+
+            setSongData({ title: "" });
+            setFile(null);
+            setVerificationMessage('');
+
+            onClose();
         }
-
-        const newSong = {
-            ...songData,
-            link: fileUrl,
-        };
-
-        onSongAdded(newSong);
-
-        setSongData({ title: "" });
-        setFile(null);
-        setVerificationMessage('');
-
-        onClose();
     };
 
     return (
