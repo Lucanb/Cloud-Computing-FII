@@ -1,6 +1,6 @@
 const { app } = require('@azure/functions');
 const { BlobServiceClient } = require('@azure/storage-blob');
-const { shuffle, findMatchingSongs } = require('./musicAI'); // Importarea funcțiilor
+const { shuffle, findMatchingSongs } = require('./musicAI');
 const { MongoClient } = require('mongodb');
 
 const connectionString = 'https://musicappluca.blob.core.windows.net/?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiyx&se=2024-08-20T00:03:21Z&st=2024-05-19T16:03:21Z&spr=https&sig=TAiN0%2BNPbD1Ie5l5aLSpDgXwEdGKYSrmUY50H%2BTEBPg%3D';
