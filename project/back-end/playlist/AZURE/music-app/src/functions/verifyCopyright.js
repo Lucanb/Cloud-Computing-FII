@@ -62,10 +62,12 @@ app.http('verify-copyright', {
 
                                         let isProtected = false;
 
+                                        // Check music section
                                         if (result.status.code === 0 && result.metadata && result.metadata.music && result.metadata.music.length > 0) {
                                             isProtected = true;
                                         }
 
+                                        // Check humming section
                                         if (result.metadata && result.metadata.humming && result.metadata.humming.length > 0) {
                                             result.metadata.humming.forEach(hummingResult => {
                                                 if (hummingResult.score >= 0.6) {
