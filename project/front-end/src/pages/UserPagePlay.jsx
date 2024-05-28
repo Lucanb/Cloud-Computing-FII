@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useContext, useCallback } from "react";
-import './PartyPage.css'; // Puteți schimba numele fișierului CSS dacă este necesar
+import './PartyPage.css';
 import { useLocation } from 'react-router-dom';
 import { AuthContext } from "../middleware";
 
 const UserPagePlay = () => {
-    const [guests, setGuests] = useState(["Alice", "Bob", "Charlie"]);
+    const [guests, setGuests] = useState([]);
     const [songs, setSongs] = useState([]);
     const [queue, setQueue] = useState([]);
     const [showQueue, setShowQueue] = useState(false);
@@ -37,23 +37,40 @@ const UserPagePlay = () => {
             return;
         }
         try {
-            const response = await fetch(`https://party-functions-luca.azurewebsites.net/api/party/get-all-songs?partyId=${partyId}`);
-            if (!response.ok) {
-                const errorResponse = await response.json();
-                throw new Error(errorResponse.message || 'Network response was not ok');
+            const partyResponse = await fetch(`https://party-functions-luca.azurewebsites.net/api/party/get-party-by-id/?partyId=${partyId}`);
+            if (!partyResponse.ok) {
+                throw new Error('Failed to fetch playlist');
             }
-            const queueData = await response.json();
-            setQueue(queueData);
+            const partyData = await partyResponse.json();
+            const playlistData = partyData.playlist;
+            const guestsData = partyData.guests;
+            setGuests(guestsData);
+            console.log('Fetched playlist data:', partyData);
+
+            const detailedSongs = await Promise.all(playlistData.map(async songId => {
+                try {
+                    const songResponse = await fetch(`https://party-functions-luca.azurewebsites.net/api/songs/getById/${songId}`);
+                    if (!songResponse.ok) {
+                        console.warn(`Song with ID ${songId} not found in existing songs`);
+                        return undefined;
+                    }
+                    return await songResponse.json();
+                } catch (error) {
+                    console.warn(`Error fetching song with ID ${songId}:`, error);
+                    return undefined;
+                }
+            }));
+            setQueue(detailedSongs.filter(song => song !== undefined));
         } catch (error) {
             console.error('Error fetching queue:', error);
         }
     }, [partyId]);
+
     useEffect(() => {
         if (partyId) {
-            setQueue(fetchQueue());
+            fetchQueue();
         }
-    }, [partyId, queue, fetchQueue]);
-
+    }, [partyId, fetchQueue]);
 
     const fetchUserSongs = async (userId) => {
         try {
@@ -122,15 +139,20 @@ const UserPagePlay = () => {
         const audio = audioRef.current;
         if (!audio) return;
 
-        if (isPlaying) {
-            audio.pause();
+        if (!currentSong && queue.length > 0) {
+            setCurrentSong(queue[0]);
+            setIsPlaying(true);
         } else {
-            audio.play().catch(error => {
-                console.error('Error playing audio:', error);
-                setIsPlaying(false);
-            });
+            if (isPlaying) {
+                audio.pause();
+            } else {
+                audio.play().catch(error => {
+                    console.error('Error playing audio:', error);
+                    setIsPlaying(false);
+                });
+            }
+            setIsPlaying(!isPlaying);
         }
-        setIsPlaying(!isPlaying);
     };
 
     const handleAddSong = async () => {
